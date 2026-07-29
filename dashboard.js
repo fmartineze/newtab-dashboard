@@ -289,6 +289,8 @@ const LANGUAGES = {
     aboutTagline:     'Nueva pestaña minimalista para Firefox',
     aboutProject:     'Proyecto',
     aboutDeveloper:   'Desarrollador',
+    aboutContributors:'Colaboradores',
+    aboutContributorsLink:'Ver colaboradores',
     aboutVersionLabel:'Versión',
     aboutLicense:     'Licencia',
     aboutLicenseHint: 'Publicado bajo licencia MIT: software libre y gratuito. Puedes usarlo, modificarlo y redistribuirlo sin restricciones, conservando el aviso de copyright.',
@@ -335,6 +337,22 @@ const LANGUAGES = {
     // sync
     syncActiveMsg:    '⇅ Firefox Sync activo',
     syncLocalMsg:     'local (sin sync)',
+    // i18n (PR #1) — etiquetas RSS/mercados/vídeos, formularios, botones y meses en genitivo
+    monthsGen: ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'],
+    feedsRss: 'Feeds RSS',
+    newLinkIn: 'Nuevo link en:',
+    rssUrl: 'URL RSS',
+    coingeckoId: 'ID CoinGecko',
+    channelId: 'Channel ID',
+    slug: 'Slug',
+    videosTip: '💡 Tip: si el canal tiene URL con <em>@usuario</em>, busca el Channel ID en <a href="https://www.youtube.com/@usuario/about" target="_blank" style="color:var(--accent-warm)">su página About</a> → Compartir → Copiar ID del canal.',
+    groups: 'grupos',
+    linksWord: 'links',
+    addGroupBtn: '+ Grupo',
+    addLinkBtn: '+ Link',
+    noBackground: 'Sin fondo',
+    monitorsFound: 'monitores encontrados',
+    weekShort: 'sem',
   },
   en: {
     // General
@@ -456,6 +474,8 @@ const LANGUAGES = {
     aboutTagline:     'A minimal new tab for Firefox',
     aboutProject:     'Project',
     aboutDeveloper:   'Developer',
+    aboutContributors:'Contributors',
+    aboutContributorsLink:'View contributors',
     aboutVersionLabel:'Version',
     aboutLicense:     'License',
     aboutLicenseHint: 'Released under the MIT license: free and open source software. You may use, modify and redistribute it without restrictions, keeping the copyright notice.',
@@ -502,6 +522,93 @@ const LANGUAGES = {
     // sync
     syncActiveMsg:    '⇅ Firefox Sync active',
     syncLocalMsg:     'local (no sync)',
+    // i18n (PR #1) — RSS/markets/videos labels, forms, buttons
+    feedsRss: 'RSS Feeds',
+    newLinkIn: 'New link in:',
+    rssUrl: 'RSS URL',
+    coingeckoId: 'CoinGecko ID',
+    channelId: 'Channel ID',
+    slug: 'Slug',
+    videosTip: '💡 Tip: if the channel has a URL with <em>@user</em>, find the Channel ID on <a href="https://www.youtube.com/@user/about" target="_blank" style="color:var(--accent-warm)">its About page</a> → Share → Copy channel ID.',
+    groups: 'groups',
+    linksWord: 'links',
+    addGroupBtn: '+ Group',
+    addLinkBtn: '+ Link',
+    noBackground: 'No background',
+    monitorsFound: 'monitors found',
+    weekShort: 'w',
+  },
+  ru: {
+    settings: 'Настройки', close: 'Закрыть', cancel: 'Отмена', add: 'Добавить', apply: 'Применить', restore: 'Сбросить',
+    refresh: 'Обновить', manage: 'Управлять', name: 'Название', items: 'Элементы', popular: 'Популярные…',
+    clickToSelect: 'Нажмите, чтобы выбрать', clickToAdd: 'Нажмите, чтобы добавить', loading: 'Загрузка...',
+    symbol: 'Символ', displayName: 'Отображаемое имя', export: 'Экспорт', import: 'Импорт',
+    news: 'Новости', feedEmpty: 'Добавьте RSS-ленту во вкладке Links.',
+    goodMorning: 'Доброе утро', goodAfternoon: 'Добрый день', goodEvening: 'Добрый вечер',
+    weather: 'Погода', wind: 'Ветер', humidity: 'Влажность', feelsLike: 'Ощущ.', calendar: 'Календарь',
+    markets: 'Рынки', quickNote: 'Быстрая заметка', writeSomething: 'Напишите что-нибудь...',
+    searchPlaceholder: 'Поиск или переход по URL...', links: 'Ссылки', videos: 'Видео',
+    searchEngine: 'Поисковик', background: 'Фон', language: 'Язык',
+    linksHint: 'Группы организованы в <strong>разделы</strong>. Каждый раздел — это ряд колонок на дашборде.',
+    newSection: 'Новый раздел', sectionName: 'Название раздела', sectionPlaceholder: 'Работа, Dev, Дом…',
+    createSection: 'Создать раздел', newGroupIn: 'Новая группа в:', groupName: 'Название группы',
+    groupPlaceholder: 'Gmail, GitHub, Proxmox…', createGroup: 'Создать группу', addLinkTo: 'Добавить ссылку в:',
+    addLink: 'Добавить ссылку', iconLabel: 'Иконка — свой URL <span style="color:var(--text-dim);font-weight:300">(необязательно, подставляется автоматически)</span>',
+    addFeed: 'Добавить ленту',
+    marketsHint: 'Цены в реальном времени через CoinGecko (бесплатно, без API key). Введите <strong>ID CoinGecko</strong> каждого актива (например: <em>bitcoin</em>, <em>ethereum</em>, <em>solana</em>).',
+    addAsset: 'Добавить актив',
+    videosHint: 'Добавляйте YouTube-каналы по <strong>Channel ID</strong> или <strong>@handle</strong>.',
+    videosHintHandle: '💡 Можно использовать @ напрямую: <em>@naseros</em>, <em>@SoyITPro</em>… ID определяется автоматически.',
+    addChannel: 'Добавить канал', videosToShow: 'Видео для показа', manageChannels: 'Управление каналами',
+    engineHint: 'Выберите поисковик по умолчанию. Прямые URL всегда открываются без поисковика.',
+    wallHint: 'Введите URL изображения ниже', imageUrl: 'URL изображения',
+    wallUrlHint: 'Unsplash, Picsum, любой публичный прямой URL · синхронизируется между устройствами',
+    presetGradients: 'Готовые градиенты', opacity: 'Прозрачность', darken: 'Затемнение', blur: 'Размытие',
+    tint: 'Тон', glass: 'Стекло', removeBackground: 'Убрать фон',
+    langHint: 'Выберите язык интерфейса.',
+    synced: '↑ синхронизировано', syncing: '↑ синхронизация…', syncError: '⚠ ошибка sync',
+    videosLabel: 'ВИДЕО',
+    days: ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'],
+    months: ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
+    monthsGen: ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'],
+    monthsShort: ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'],
+    dow: ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],
+    weatherCodes: {0:'Ясно',1:'Преимущественно ясно',2:'Переменная облачность',3:'Пасмурно',45:'Туман',48:'Туман',51:'Морось',61:'Дождь',63:'Дождь',65:'Дождь',71:'Снег',80:'Ливень',81:'Ливень',95:'Гроза'},
+    appearance: 'Внешний вид', theme: 'Тема', themeHint: 'Настройте цветовую палитру интерфейса.',
+    fontSize: 'Размер шрифта', editLink: 'Редактировать ссылку', alertAddLink: 'Заполните название и URL.',
+    uptime: 'Uptime', uptimeHint: 'Подключите свой экземпляр Uptime Kuma через публичную Status Page. Учётные данные не требуются.',
+    uptimeUrl: 'URL Uptime Kuma', save: 'Сохранить', remove: 'Удалить',
+    uptimeAllUp: 'Все работают', uptimePartial: 'Частичные сбои', uptimeDown: 'Активный инцидент',
+    uptimeError: 'Ошибка подключения', uptimeLoading: 'Подключение…',
+    about: 'О программе', aboutTagline: 'Минималистичная новая вкладка для Firefox',
+    aboutProject: 'Проект', aboutDeveloper: 'Разработчик', aboutVersionLabel: 'Версия',
+    aboutContributors: 'Соавторы', aboutContributorsLink: 'Посмотреть соавторов',
+    aboutLicense: 'Лицензия',
+    aboutLicenseHint: 'Опубликовано под лицензией MIT: свободное и открытое ПО. Вы можете использовать, изменять и распространять его без ограничений, сохраняя уведомление об авторских правах.',
+    aboutPrivacy: 'Все ваши настройки хранятся <strong>в вашем браузере</strong> и синхронизируются через аккаунт Firefox. Расширение не собирает и не отправляет персональные данные и не требует API-ключей.',
+    noItems: 'Нет элементов.', noSections: 'Разделов пока нет.', noFeeds: 'Нет лент.', noAssets: 'Нет активов.',
+    noChannels: 'Нет каналов. Добавьте ниже.', noVideos: 'Нет видео. Добавьте каналы через ⚙',
+    noMarketsAdded: 'Добавьте активы через ⚙', loadingDots: 'Загрузка…', loadingVideos: 'Загрузка видео…',
+    errorFeed: 'Ошибка загрузки ленты.', errorMarkets: 'Ошибка загрузки — у CoinGecko может быть лимит запросов. Попробуйте чуть позже.',
+    errorChannel: 'Не удалось загрузить канал.', errorImageLoad: '⚠ Не удалось загрузить изображение',
+    wallPreview: 'Предпросмотр', wallEnterUrl: 'Введите URL изображения ниже',
+    searchWith: 'Искать через', searchOrUrl: 'или перейти по URL…',
+    alertFillFields: 'Заполните как минимум ID CoinGecko и символ.', alertAssetExists: 'Такой актив уже добавлен.',
+    alertFillChannel: 'Введите Channel ID.', alertChannelExists: 'Канал уже добавлен.',
+    alertInvalidFile: 'Неверный файл. Убедитесь, что это экспорт Dashboard.',
+    alertImportOk: '✓ Конфигурация успешно импортирована.', alertImportError: 'Ошибка чтения файла. Убедитесь, что это корректный JSON.',
+    alertAddFeed: 'Заполните название и URL.', alertAddGroup: 'Введите название группы.',
+    alertAddSection: 'Введите название раздела.',
+    importConfirmTitle: 'Импортировать конфигурацию от',
+    importConfirmSections: 'разделов ссылок', importConfirmFeeds: 'RSS-лент',
+    importConfirmMarkets: 'рыночных активов', importConfirmChannels: 'видеоканалов',
+    importConfirmWarning: 'Это заменит текущую конфигурацию.', exportFilename: 'dashboard-config',
+    syncActiveMsg: '⇅ Firefox Sync активен', syncLocalMsg: 'локально (без sync)',
+    feedsRss: 'RSS-ленты', newLinkIn: 'Новая ссылка в:', rssUrl: 'URL RSS', coingeckoId: 'ID CoinGecko',
+    channelId: 'Channel ID', slug: 'Slug',
+    videosTip: '💡 Совет: если у канала URL с <em>@пользователь</em>, Channel ID можно найти на <a href="https://www.youtube.com/@пользователь/about" target="_blank" style="color:var(--accent-warm)">странице About</a> → Поделиться → Скопировать ID канала.',
+    groups: 'групп', linksWord: 'ссылок', addGroupBtn: '+ Группа', addLinkBtn: '+ Ссылка',
+    noBackground: 'Без фона', monitorsFound: 'мониторов найдено', weekShort: 'нед',
   }
 };
 
@@ -554,12 +661,34 @@ function applyLang(langCode, save=true) {
   if (typeof renderLangModal === 'function') renderLangModal();
 }
 
+// Detect the browser UI language on first install; fall back to English for
+// locales we don't ship. Only reads local browser settings — nothing leaves the device.
+function getBrowserLang() {
+  let lang = '';
+  if (typeof browser !== 'undefined' && browser.i18n && typeof browser.i18n.getUILanguage === 'function') {
+    try { lang = browser.i18n.getUILanguage(); } catch {}
+  }
+  if (!lang && typeof navigator !== 'undefined') {
+    lang = navigator.language || (navigator.languages && navigator.languages[0]) || navigator.userLanguage || '';
+  }
+  lang = (lang || '').toLowerCase().split('-')[0].split('_')[0];
+  return (LANGUAGES[lang]) ? lang : 'en';
+}
+
+// BCP-47 locale for date/number formatting, derived from the active UI language.
+function getLocale() {
+  if (currentLang === 'ru') return 'ru-RU';
+  if (currentLang === 'es') return 'es-ES';
+  return 'en-GB';
+}
+
 function renderLangModal() {
   const list = document.getElementById('langList'); if (!list) return;
   list.innerHTML = '';
   const langs = [
     { code:'es', label:'Español', flag:'🇪🇸' },
     { code:'en', label:'English', flag:'🇬🇧' },
+    { code:'ru', label:'Русский', flag:'🇷🇺' },
   ];
   langs.forEach(l => {
     const row = document.createElement('div'); row.className = 'engine-row' + (l.code === currentLang ? ' active' : '');
@@ -583,7 +712,8 @@ function tick() {
   const mm = String(n.getMinutes()).padStart(2,'0');
   document.getElementById('clock').textContent = `${hh}:${mm}`;
   document.getElementById('dateDay').textContent   = n.getDate();
-  document.getElementById('dateMonth').textContent = t.months[n.getMonth()];
+  // Genitive month form when the language provides one (e.g. Russian "22 июля"); nominative otherwise
+  document.getElementById('dateMonth').textContent = (t.monthsGen && t.monthsGen[n.getMonth()]) || t.months[n.getMonth()];
   document.getElementById('dateWeekday').textContent = t.days[n.getDay()];
   const h = n.getHours();
   document.getElementById('greetSub').textContent = h<12 ? t.goodMorning : h<20 ? t.goodAfternoon : t.goodEvening;
@@ -849,7 +979,7 @@ function renderFeedRows(items, container) {
   const list = document.createElement('div'); list.className = 'feed-list feed-list-scroll';
   items.forEach((item, i) => {
     const row = document.createElement('div'); row.className = 'feed-row';
-    const locale = currentLang === 'es' ? 'es-ES' : 'en-GB';
+    const locale = getLocale();
     const pub = item.pubDate && item.pubDate.getTime() > 0
       ? item.pubDate.toLocaleDateString(locale, { day:'2-digit', month:'short' })
       : '';
@@ -926,11 +1056,11 @@ function renderSectionModal() {
     const scHead = document.createElement('div'); scHead.style.cssText='display:flex;align-items:center;gap:9px;';
     const scInfo = document.createElement('div'); scInfo.className='item-card-info';
     const scName = document.createElement('div'); scName.className='item-card-name'; scName.textContent=sec.name;
-    const scSub  = document.createElement('div'); scSub.className='item-card-sub'; scSub.textContent=sec.groups.length+' grupos';
+    const scSub  = document.createElement('div'); scSub.className='item-card-sub'; scSub.textContent=sec.groups.length+' '+t.groups;
     scInfo.appendChild(scName); scInfo.appendChild(scSub);
 
     const scAct = document.createElement('div'); scAct.className='item-card-actions';
-    scAct.appendChild(makeBtn('btn btn-ghost btn-sm', '+ Grupo', () => openAddGroup(sec.id)));
+    scAct.appendChild(makeBtn('btn btn-ghost btn-sm', t.addGroupBtn, () => openAddGroup(sec.id)));
     if (si>0)               scAct.appendChild(makeBtn('btn btn-ghost btn-sm','↑',() => moveSection(sec.id,-1)));
     if (si<sections.length-1) scAct.appendChild(makeBtn('btn btn-ghost btn-sm','↓',() => moveSection(sec.id, 1)));
     scAct.appendChild(makeBtn('btn btn-danger btn-sm','×',() => deleteSection(sec.id)));
@@ -947,11 +1077,11 @@ function renderSectionModal() {
         const gcHead = document.createElement('div'); gcHead.style.cssText='display:flex;align-items:center;gap:8px;';
         const gcInfo = document.createElement('div'); gcInfo.className='item-card-info';
         const gcName = document.createElement('div'); gcName.className='item-card-name'; gcName.style.fontSize='11.5px'; gcName.textContent=g.name;
-        const gcSub  = document.createElement('div'); gcSub.className='item-card-sub'; gcSub.textContent=g.links.length+' links';
+        const gcSub  = document.createElement('div'); gcSub.className='item-card-sub'; gcSub.textContent=g.links.length+' '+t.linksWord;
         gcInfo.appendChild(gcName); gcInfo.appendChild(gcSub);
 
         const gcAct = document.createElement('div'); gcAct.className='item-card-actions';
-        gcAct.appendChild(makeBtn('btn btn-ghost btn-sm','+ Link',() => openAddLink(sec.id, g.id)));
+        gcAct.appendChild(makeBtn('btn btn-ghost btn-sm',t.addLinkBtn,() => openAddLink(sec.id, g.id)));
         if (gi>0)               gcAct.appendChild(makeBtn('btn btn-ghost btn-sm','↑',() => moveGroup(sec.id,g.id,-1)));
         if (gi<sec.groups.length-1) gcAct.appendChild(makeBtn('btn btn-ghost btn-sm','↓',() => moveGroup(sec.id,g.id, 1)));
         gcAct.appendChild(makeBtn('btn btn-danger btn-sm','×',() => deleteGroup(sec.id,g.id)));
@@ -1225,7 +1355,7 @@ function removeWallpaper() { wallSettings={...DEFAULT_WALL}; applyWallSettings(w
 function resetWallSettings() { const {src,type,grad}=wallSettings; wallSettings={...DEFAULT_WALL,src,type,grad}; applyWallSettings(wallSettings); saveWall(); }
 function renderGradientPresets() {
   const wrap=document.getElementById('wallPresets'); if(!wrap)return; wrap.innerHTML='';
-  const none=document.createElement('div'); none.className='wall-preset wall-preset-none'+(wallSettings.type==='none'?' active':''); none.textContent='Sin fondo';
+  const none=document.createElement('div'); none.className='wall-preset wall-preset-none'+(wallSettings.type==='none'?' active':''); none.textContent=t.noBackground;
   none.addEventListener('click',removeWallpaper); wrap.appendChild(none);
   GRADIENT_PRESETS.forEach(p => {
     const d=document.createElement('div'); d.className='wall-preset'+(wallSettings.grad===p.grad?' active':''); d.style.background=p.grad; d.title=p.label;
@@ -1269,10 +1399,10 @@ function renderMarkets(data) {
     if (info) {
       const price = info.eur;
       val.textContent = price >= 1000
-        ? '€' + price.toLocaleString('es-ES', {maximumFractionDigits:0})
+        ? '€' + price.toLocaleString(getLocale(), {maximumFractionDigits:0})
         : price >= 1
-        ? '€' + price.toLocaleString('es-ES', {minimumFractionDigits:2, maximumFractionDigits:4})
-        : '€' + price.toLocaleString('es-ES', {minimumFractionDigits:4, maximumFractionDigits:6});
+        ? '€' + price.toLocaleString(getLocale(), {minimumFractionDigits:2, maximumFractionDigits:4})
+        : '€' + price.toLocaleString(getLocale(), {minimumFractionDigits:4, maximumFractionDigits:6});
       const pct = info.eur_24h_change;
       chg.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
       chg.classList.add(pct >= 0 ? 'up' : 'dn');
@@ -1473,7 +1603,7 @@ function timeAgo(dateStr) {
   if (diff < 3600)   return Math.floor(diff/60)  + 'm';
   if (diff < 86400)  return Math.floor(diff/3600) + 'h';
   if (diff < 604800) return Math.floor(diff/86400)+ 'd';
-  return Math.floor(diff/604800) + 'sem';
+  return Math.floor(diff/604800) + t.weekShort;
 }
 
 function parseYouTubeXml(xml, ch) {
@@ -1773,7 +1903,7 @@ function importConfig(file) {
         alert(t.alertInvalidFile);
         return;
       }
-      const locale = currentLang === 'es' ? 'es-ES' : 'en-GB';
+      const locale = getLocale();
       const exportDate = config.exported ? new Date(config.exported).toLocaleDateString(locale) : '?';
       const ok = confirm(
         t.importConfirmTitle + ' ' + exportDate + '?\n\n' +
@@ -2100,7 +2230,7 @@ async function saveUptimeConfig() {
     const data = await res.json();
     const monitors = (data.publicGroupList || []).reduce((n, g) => n + (g.monitorList?.length || 0), 0);
     if (result) {
-      result.textContent = '✓ ' + monitors + ' monitores encontrados';
+      result.textContent = '✓ ' + monitors + ' ' + t.monitorsFound;
       result.style.color = 'var(--green)';
     }
     uptimeConfig = { url, slug };
@@ -2190,7 +2320,7 @@ function updateEditIconPreview(url) {
 // ════════════════════════════════════════════════
 // Fallback only for when the page is opened outside the extension context
 // (e.g. dashboard.html served as a plain file). The real source of truth is manifest.json.
-const APP_VERSION_FALLBACK = '1.8.3';
+const APP_VERSION_FALLBACK = '1.8.4';
 
 function getAppVersion() {
   try {
@@ -2321,8 +2451,10 @@ async function init() {
   markets  = await Store.get('gd_markets',  DEFAULT_MARKETS);
   const savedEngine = await Store.get('gd_engine', 'google');
   applyEngine(savedEngine);
-  const savedLang = await Store.get('gd_lang', 'es');
-  applyLang(savedLang);
+  // Use the saved preference if any; otherwise detect the browser language (fallback EN).
+  // save=false so we don't persist until the user explicitly picks a language.
+  const savedLang = await Store.get('gd_lang', null);
+  applyLang(savedLang || getBrowserLang(), false);
   const savedTheme = await Store.get('gd_theme', 'obsidian');
   applyTheme(savedTheme);
   const savedFont = await Store.get('gd_fontsize', 'md');

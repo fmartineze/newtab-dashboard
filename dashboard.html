@@ -82,7 +82,7 @@
       <div class="videos-header">
         <span class="section-label" style="border:none;padding:0;margin:0" data-i18n="videos"></span>
         <div style="display:flex;gap:8px;align-items:center">
-          <button class="sb-refresh" id="btnRefreshVideos" title="Actualizar">↻</button>
+          <button class="sb-refresh" id="btnRefreshVideos" data-i18n-title="refresh">↻</button>
           <button class="sb-refresh" id="btnManageVideos" data-i18n-title="manageChannels" style="font-size:11px">⚙</button>
         </div>
       </div>
@@ -156,11 +156,11 @@
       </div>
       <div class="modal-tab" data-tab="feeds">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 019 9"/><path d="M4 4a16 16 0 0116 16"/><circle cx="5" cy="19" r="1.4" fill="currentColor" stroke="none"/></svg>
-        <span>Feeds RSS</span>
+        <span data-i18n="feedsRss"></span>
       </div>
       <div class="modal-tab" data-tab="markets">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 7l-7.5 7.5-4-4L2 19"/><path d="M16 7h6v6"/></svg>
-        <span>Markets</span>
+        <span data-i18n="markets"></span>
       </div>
       <div class="modal-tab" data-tab="videos">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4.5" width="19" height="15" rx="3.5"/><path d="M10.5 9.2l4.6 2.8-4.6 2.8z"/></svg>
@@ -215,7 +215,7 @@
         </div>
         <!-- Add link inside group -->
         <div class="add-form" id="addLinkForm" style="display:none">
-          <div class="add-form-title">Nuevo link en: <span id="addLinkGroupName" class="accent-warm"></span></div>
+          <div class="add-form-title"><span data-i18n="newLinkIn"></span> <span id="addLinkGroupName" class="accent-warm"></span></div>
           <div class="field-row">
             <div class="field"><label data-i18n="name"></label><input id="lName" type="text" placeholder="GitHub" /></div>
             <div class="field"><label>URL</label><input id="lUrl" type="url" placeholder="https://github.com" /></div>
@@ -274,7 +274,7 @@
             <div class="field" style="flex:1.4"><label data-i18n="name"></label><input id="fName" type="text" placeholder="Hacker News" /></div>
             <div class="field" style="flex:0.6"><label data-i18n="items"></label><input id="fCount" type="number" value="8" min="3" max="30" /></div>
           </div>
-          <div class="field"><label>URL RSS</label><input id="fUrl" type="url" placeholder="https://hnrss.org/frontpage" /></div>
+          <div class="field"><label data-i18n="rssUrl"></label><input id="fUrl" type="url" placeholder="https://hnrss.org/frontpage" /></div>
           <div class="btn-row">
             <button class="btn btn-primary" id="btnAddFeed" data-i18n="add"></button>
             <button class="btn btn-ghost" id="btnTogglePresets" data-i18n="popular"></button>
@@ -295,7 +295,7 @@
           <div class="add-form-title" data-i18n="addAsset"></div>
           <div class="field-row">
             <div class="field" style="flex:1.2">
-              <label>ID CoinGecko</label>
+              <label data-i18n="coingeckoId"></label>
               <input id="mCoinId" type="text" placeholder="bitcoin, ethereum, solana…" />
             </div>
             <div class="field" style="flex:0.8">
@@ -328,7 +328,7 @@
           <div class="add-form-title" data-i18n="addChannel"></div>
           <div class="field-row">
             <div class="field" style="flex:1.4">
-              <label>Channel ID</label>
+              <label data-i18n="channelId"></label>
               <input id="vChannelId" type="text" placeholder="@naseros o UCBcRF18a7Qf58cCRy5xuWwQ" />
             </div>
             <div class="field" style="flex:0.8">
@@ -344,7 +344,7 @@
             <button class="btn btn-primary btn-sm" id="btnAddChannel" data-i18n="addChannel"></button>
           </div>
         </div>
-        <p class="hint-text" style="margin-top:4px">💡 Tip: si el canal tiene URL con <em>@usuario</em>, busca el Channel ID en <a href="https://www.youtube.com/@usuario/about" target="_blank" style="color:var(--accent-warm)">su página About</a> → Compartir → Copiar ID del canal.</p>
+        <p class="hint-text" style="margin-top:4px" data-i18n-html="videosTip"></p>
       </div>
 
       <!-- TAB BUSCADOR -->
@@ -409,7 +409,7 @@
             <input id="ukUrl" type="url" placeholder="https://uptime.miservidor.com" />
           </div>
           <div class="field" style="flex:1">
-            <label>Slug</label>
+            <label data-i18n="slug"></label>
             <input id="ukSlug" type="text" placeholder="default" />
           </div>
         </div>
@@ -447,6 +447,10 @@
           <div class="about-row">
             <span class="about-row-label" data-i18n="aboutDeveloper"></span>
             <span class="about-row-value">Francisco Martínez</span>
+          </div>
+          <div class="about-row">
+            <span class="about-row-label" data-i18n="aboutContributors"></span>
+            <a class="about-row-value about-link" href="https://github.com/fmartineze/newtab-dashboard/blob/master/CONTRIBUTORS.md" target="_blank" rel="noopener noreferrer" data-i18n="aboutContributorsLink"></a>
           </div>
           <div class="about-row">
             <span class="about-row-label" data-i18n="aboutVersionLabel"></span>
