@@ -74,6 +74,64 @@ body.no-wall #wallDim  { background:#0a0a0c; }
   height:100vh;
 }
 
+/* ══════════ WIDGET SYSTEM ══════════ */
+.widget-col {
+  flex:1; min-height:0;
+  display:flex; flex-direction:column; gap:20px;
+  padding:22px 18px; overflow-y:auto;
+}
+/* Widgets keep their natural height (never shrink below content → no overlap);
+   the column scrolls instead. "grow" widgets fill spare space but stay usable. */
+.widget { flex:0 0 auto; overflow:hidden; }
+.widget-grow { flex:1 1 auto; min-height:200px; display:flex; flex-direction:column; }
+/* Feeds keeps enough height to show ~4 headlines before its internal scroll */
+#w-feeds { min-height:280px; }
+/* Extra top clearance on the right bar so the fixed gear button never overlaps */
+#rightWidgets { padding-top:46px; }
+
+/* Collapse a bar when it has no active widgets — the center expands.
+   Keep the element in the grid (width 0) so the remaining columns don't shift. */
+body.no-left  .sidebar { width:0; min-width:0; border-right:none; overflow:hidden; }
+body.no-right .panel   { width:0; min-width:0; border-left:none;  overflow:hidden; }
+body.no-left  .shell { grid-template-columns:0 1fr var(--panel); }
+body.no-right .shell { grid-template-columns:var(--sb) 1fr 0; }
+body.no-left.no-right .shell { grid-template-columns:0 1fr 0; }
+/* When the right bar is gone the search bar spans full width; pad its content on
+   the right so it clears the fixed gear (the bar background still reaches the edge). */
+body.no-right .search-bar { padding-right:56px; }
+
+/* Widget manager (settings → Widgets) */
+.widget-manager { display:flex; flex-direction:column; gap:6px; }
+.widget-row {
+  display:flex; align-items:center; gap:12px;
+  background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06);
+  border-radius:10px; padding:9px 12px; transition:opacity 0.15s;
+}
+.widget-row.inactive { opacity:0.5; }
+.widget-row-name { flex:1; font-size:12.5px; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.widget-switch {
+  flex-shrink:0; width:34px; height:19px; border-radius:19px; padding:0;
+  background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.10);
+  cursor:pointer; position:relative; transition:background 0.16s, border-color 0.16s;
+}
+.widget-switch.on { background:var(--accent-warm); border-color:var(--accent-warm); }
+.widget-switch-knob {
+  position:absolute; top:1.5px; left:1.5px; width:14px; height:14px; border-radius:50%;
+  background:#fff; transition:transform 0.16s;
+}
+.widget-switch.on .widget-switch-knob { transform:translateX(15px); }
+.widget-seg { display:flex; flex-shrink:0; border:1px solid var(--glass-border); border-radius:7px; overflow:hidden; }
+.widget-seg-btn {
+  padding:4px 9px; font-size:10.5px; font-family:var(--font-sans);
+  background:transparent; color:var(--text-muted); border:none; cursor:pointer; transition:all 0.13s;
+}
+.widget-seg-btn:not(:last-child) { border-right:1px solid var(--glass-border); }
+.widget-seg-btn.active { background:var(--accent-glow); color:var(--accent-warm); }
+.widget-seg-btn:disabled { opacity:0.4; cursor:default; }
+.widget-ord { display:flex; gap:4px; flex-shrink:0; }
+.widget-ord .btn { padding:3px 8px; }
+.widget-ord .btn:disabled { opacity:0.3; cursor:default; }
+
 /* ══════════ SIDEBAR ══════════ */
 .sidebar {
   display:flex; flex-direction:column; gap:0;
@@ -85,8 +143,7 @@ body.no-wall #wallDim  { background:#0a0a0c; }
 }
 
 .sidebar-top {
-  padding:28px 20px 20px;
-  border-bottom:1px solid var(--glass-border);
+  padding:2px 2px 4px;
 }
 .clock-big {
   font-family:var(--font-mono);
@@ -107,8 +164,6 @@ body.no-wall #wallDim  { background:#0a0a0c; }
 
 /* Feeds in sidebar */
 .sidebar-feeds {
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--glass-border);
   flex: 1;
   min-height: 120px;
   display: flex; flex-direction: column; gap: 10px;
@@ -256,7 +311,7 @@ body.no-wall #wallDim  { background:#0a0a0c; }
 /* ══════════ RIGHT PANEL ══════════ */
 .panel {
   border-left:1px solid var(--glass-border);
-  padding:24px 18px; display:flex; flex-direction:column; gap:22px; overflow-y:auto;
+  padding:0; display:flex; flex-direction:column; overflow:hidden;
   backdrop-filter:blur(var(--glass-blur)) saturate(1.5);
   -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(1.5);
   background:var(--glass-bg);
@@ -571,13 +626,7 @@ body.theme-arctic.no-wall #wallDim { background:#060e12; }
 
 /* ── Uptime Kuma in sidebar ── */
 .sidebar-uptime {
-  padding: 14px 20px;
   display: flex; flex-direction: column; gap: 8px;
-  flex: 1;
-  min-height: 180px;
-  max-height: 50%;
-  border-top: 1px solid var(--glass-border);
-  overflow: hidden;
 }
 .uptime-header { display:none; } /* not used in sidebar */
 .uptime-header-left { display: flex; align-items: center; gap: 6px; }

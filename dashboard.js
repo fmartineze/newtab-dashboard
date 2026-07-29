@@ -56,6 +56,7 @@ if (USE_SYNC) {
     if (changes.gd_theme)    applyTheme(changes.gd_theme.newValue, false);
     if (changes.gd_fontsize) applyFontSize(changes.gd_fontsize.newValue, false);
     if (changes.gd_uptime)   { uptimeConfig = changes.gd_uptime.newValue; loadUptime(); }
+    if (changes.gd_widgets)  { widgets = normalizeWidgets(changes.gd_widgets.newValue); renderWidgetLayout(); renderModalNav(); renderWidgetsModal(); }
     showSyncBadge('synced');
   });
 }
@@ -140,6 +141,34 @@ let wallSettings = { ...DEFAULT_WALL };
 let activeFeedId = null;
 let feedCache    = {};
 
+// ════════════════════════════════════════════════
+//  WIDGETS registry & state
+//  To add a new widget: wrap its block in <section class="widget" id="w-<id>">,
+//  add an entry here and in DEFAULT_WIDGETS. `i18n` is the label key, `configTab`
+//  the settings tab id (or null if the widget has no configuration).
+// ════════════════════════════════════════════════
+const WIDGETS = [
+  { id:'clock',    i18n:'clockWidget', configTab:null },
+  { id:'feeds',    i18n:'news',        configTab:'feeds' },
+  { id:'uptime',   i18n:'uptime',      configTab:'uptime' },
+  { id:'weather',  i18n:'weather',     configTab:null },
+  { id:'calendar', i18n:'calendar',    configTab:null },
+  { id:'markets',  i18n:'markets',     configTab:'markets' },
+  { id:'note',     i18n:'quickNote',   configTab:null },
+];
+// Default layout replicates the pre-widget-manager dashboard exactly.
+// Uptime starts inactive (it was hidden until configured).
+const DEFAULT_WIDGETS = [
+  { id:'clock',    active:true,  col:'left'  },
+  { id:'feeds',    active:true,  col:'left'  },
+  { id:'uptime',   active:false, col:'left'  },
+  { id:'weather',  active:true,  col:'right' },
+  { id:'calendar', active:true,  col:'right' },
+  { id:'markets',  active:true,  col:'right' },
+  { id:'note',     active:true,  col:'right' },
+];
+let widgets = DEFAULT_WIDGETS.map(w => ({ ...w }));
+
 // pending add state
 let pendingSection = null; // section id waiting for a new group
 let pendingGroup   = null; // {sectionId, groupId} waiting for a new link
@@ -162,6 +191,10 @@ async function saveChannels() {
 }
 async function saveWall() {
   await Store.set('gd_wall', wallSettings);
+}
+async function saveWidgets() {
+  showSyncBadge('syncing');
+  await Store.set('gd_widgets', widgets);
 }
 
 
@@ -284,6 +317,12 @@ const LANGUAGES = {
     uptimeDown:     'Incidente activo',
     uptimeError:    'Error al conectar',
     uptimeLoading:  'Conectando…',
+    // Tab Widgets
+    widgets:          'Widgets',
+    widgetsHint:      'Activa o desactiva cada widget, elige en qué barra aparece (izquierda o derecha) y su orden. Solo los widgets activos se muestran en el dashboard.',
+    clockWidget:      'Reloj',
+    colLeft:          'Izquierda',
+    colRight:         'Derecha',
     // Tab Acerca de
     about:            'Acerca de',
     aboutTagline:     'Nueva pestaña minimalista para Firefox',
@@ -469,6 +508,12 @@ const LANGUAGES = {
     uptimeDown:     'Active incident',
     uptimeError:    'Connection error',
     uptimeLoading:  'Connecting…',
+    // Tab Widgets
+    widgets:          'Widgets',
+    widgetsHint:      'Enable or disable each widget, choose which bar it appears in (left or right) and its order. Only active widgets are shown on the dashboard.',
+    clockWidget:      'Clock',
+    colLeft:          'Left',
+    colRight:         'Right',
     // Tab About
     about:            'About',
     aboutTagline:     'A minimal new tab for Firefox',
@@ -580,6 +625,9 @@ const LANGUAGES = {
     uptimeUrl: 'URL Uptime Kuma', save: 'Сохранить', remove: 'Удалить',
     uptimeAllUp: 'Все работают', uptimePartial: 'Частичные сбои', uptimeDown: 'Активный инцидент',
     uptimeError: 'Ошибка подключения', uptimeLoading: 'Подключение…',
+    widgets: 'Виджеты',
+    widgetsHint: 'Включайте или отключайте виджеты, выбирайте, в какой панели они отображаются (слева или справа) и их порядок. На дашборде показываются только активные виджеты.',
+    clockWidget: 'Часы', colLeft: 'Слева', colRight: 'Справа',
     about: 'О программе', aboutTagline: 'Минималистичная новая вкладка для Firefox',
     aboutProject: 'Проект', aboutDeveloper: 'Разработчик', aboutVersionLabel: 'Версия',
     aboutContributors: 'Соавторы', aboutContributorsLink: 'Посмотреть соавторов',
@@ -715,8 +763,6 @@ function tick() {
   // Genitive month form when the language provides one (e.g. Russian "22 июля"); nominative otherwise
   document.getElementById('dateMonth').textContent = (t.monthsGen && t.monthsGen[n.getMonth()]) || t.months[n.getMonth()];
   document.getElementById('dateWeekday').textContent = t.days[n.getDay()];
-  const h = n.getHours();
-  document.getElementById('greetSub').textContent = h<12 ? t.goodMorning : h<20 ? t.goodAfternoon : t.goodEvening;
 }
 tick(); setInterval(tick, 15000);
 
@@ -1019,9 +1065,122 @@ async function loadWeather() {
 }
 
 // ════════════════════════════════════════════════
+//  WIDGETS — layout, manager and settings-nav filter
+// ════════════════════════════════════════════════
+const widgetName = id => { const w = WIDGETS.find(x => x.id===id); return (w && t[w.i18n]) || id; };
+
+// Reconcile stored widgets with the registry: keep known ids in stored order,
+// append any registry widgets missing from storage (forward compatibility),
+// drop unknown ids.
+function normalizeWidgets(stored) {
+  const known = new Set(WIDGETS.map(w => w.id));
+  const seen = new Set();
+  const out = [];
+  (stored || []).forEach(w => {
+    if (w && known.has(w.id) && !seen.has(w.id)) {
+      out.push({ id:w.id, active: !!w.active, col: (w.col==='right' ? 'right' : 'left') });
+      seen.add(w.id);
+    }
+  });
+  DEFAULT_WIDGETS.forEach(d => { if (!seen.has(d.id)) out.push({ ...d }); });
+  return out;
+}
+
+// Place each widget's DOM node into its column in order; hide inactive ones;
+// collapse a bar when it has no active widgets.
+function renderWidgetLayout() {
+  const left  = document.getElementById('leftWidgets');
+  const right = document.getElementById('rightWidgets');
+  if (!left || !right) return;
+  let nLeft = 0, nRight = 0;
+  widgets.forEach(w => {
+    const el = document.getElementById('w-' + w.id);
+    if (!el) return;
+    if (!w.active) { el.style.display = 'none'; return; }
+    el.style.display = '';
+    (w.col === 'right' ? right : left).appendChild(el);   // appendChild moves + reorders
+    if (w.col === 'right') nRight++; else nLeft++;
+  });
+  document.body.classList.toggle('no-left',  nLeft === 0);
+  document.body.classList.toggle('no-right', nRight === 0);
+}
+
+// Only show config tabs of active widgets; hide the Widgets-group separator if empty.
+function renderModalNav() {
+  const active = new Set(widgets.filter(w => w.active).map(w => w.id));
+  let anyWidgetTab = false;
+  document.querySelectorAll('.modal-tab[data-widget-tab]').forEach(tab => {
+    const on = active.has(tab.dataset.widgetTab);
+    tab.style.display = on ? '' : 'none';
+    if (on) anyWidgetTab = true;
+  });
+  const sep = document.getElementById('navSepWidgets');
+  if (sep) sep.style.display = anyWidgetTab ? '' : 'none';
+}
+
+// Manager row actions
+function toggleWidget(id) {
+  const w = widgets.find(x => x.id===id); if (!w) return;
+  w.active = !w.active;
+  saveWidgets(); renderWidgetLayout(); renderModalNav(); renderWidgetsModal();
+}
+function setWidgetCol(id, col) {
+  const w = widgets.find(x => x.id===id); if (!w || w.col===col) return;
+  w.col = col;
+  saveWidgets(); renderWidgetLayout(); renderWidgetsModal();
+}
+function moveWidget(id, dir) {
+  const i = widgets.findIndex(x => x.id===id); const ni = i + dir;
+  if (i<0 || ni<0 || ni>=widgets.length) return;
+  [widgets[i], widgets[ni]] = [widgets[ni], widgets[i]];
+  saveWidgets(); renderWidgetLayout(); renderWidgetsModal();
+}
+
+function renderWidgetsModal() {
+  const box = document.getElementById('widgetManager'); if (!box) return;
+  box.innerHTML = '';
+  widgets.forEach((w, idx) => {
+    const row = document.createElement('div'); row.className = 'widget-row' + (w.active ? '' : ' inactive');
+
+    // Active toggle (switch)
+    const sw = document.createElement('button');
+    sw.className = 'widget-switch' + (w.active ? ' on' : '');
+    sw.setAttribute('role', 'switch');
+    sw.setAttribute('aria-checked', w.active ? 'true' : 'false');
+    sw.innerHTML = '<span class="widget-switch-knob"></span>';
+    sw.addEventListener('click', () => toggleWidget(w.id));
+
+    // Name
+    const name = document.createElement('div'); name.className = 'widget-row-name'; name.textContent = widgetName(w.id);
+
+    // Column segmented control (left / right)
+    const seg = document.createElement('div'); seg.className = 'widget-seg';
+    [['left', t.colLeft], ['right', t.colRight]].forEach(([col, label]) => {
+      const b = document.createElement('button');
+      b.className = 'widget-seg-btn' + (w.col===col ? ' active' : '');
+      b.textContent = label;
+      b.disabled = !w.active;
+      b.addEventListener('click', () => setWidgetCol(w.id, col));
+      seg.appendChild(b);
+    });
+
+    // Reorder up / down
+    const ord = document.createElement('div'); ord.className = 'widget-ord';
+    const up = document.createElement('button'); up.className = 'btn btn-ghost btn-sm'; up.textContent = '↑';
+    up.disabled = idx===0; up.addEventListener('click', () => moveWidget(w.id, -1));
+    const dn = document.createElement('button'); dn.className = 'btn btn-ghost btn-sm'; dn.textContent = '↓';
+    dn.disabled = idx===widgets.length-1; dn.addEventListener('click', () => moveWidget(w.id, 1));
+    ord.appendChild(up); ord.appendChild(dn);
+
+    row.appendChild(sw); row.appendChild(name); row.appendChild(seg); row.appendChild(ord);
+    box.appendChild(row);
+  });
+}
+
+// ════════════════════════════════════════════════
 //  MODAL
 // ════════════════════════════════════════════════
-function openModal(tab='links') { document.getElementById('modalOverlay').classList.add('open'); switchTab(tab); }
+function openModal(tab='links') { document.getElementById('modalOverlay').classList.add('open'); renderModalNav(); switchTab(tab); }
 function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); resetPending(); }
 function resetPending() { pendingSection=null; pendingGroup=null; document.getElementById('addGroupForm').style.display='none'; document.getElementById('addLinkForm').style.display='none'; }
 
@@ -1035,6 +1194,7 @@ function switchTab(tab) {
   if (tab==='lang')    renderLangModal();
   if (tab==='uptime')  renderUptimeModal();
   if (tab==='videos')  renderVideoChannelModal();
+  if (tab==='widgets') renderWidgetsModal();
   if (tab==='about')   renderAbout();
   if (tab==='appearance') { renderThemeModal(); renderGradientPresets(); updateWallPreview(wallSettings.type==='image'?wallSettings.src:null); }
 }
@@ -1877,6 +2037,7 @@ function exportConfig() {
     feeds,
     markets,
     channels,
+    widgets,
     wall:     { ...wallSettings, src: null }, // skip image URL if any — user can re-add
   };
   // Include wall src only if it's a URL (not base64)
@@ -1925,6 +2086,13 @@ function importConfig(file) {
       if (config.fontsize) { applyFontSize(config.fontsize); }
       if (config.uptime)   { uptimeConfig = config.uptime; await Store.set('gd_uptime', uptimeConfig); loadUptime(true); }
       if (config.wall)     { wallSettings = { ...DEFAULT_WALL, ...config.wall }; await Store.set('gd_wall', wallSettings); applyWallSettings(wallSettings); }
+      if (config.widgets)  { widgets = normalizeWidgets(config.widgets); await Store.set('gd_widgets', widgets); }
+      // Older backups (pre-widget-manager) carry no widget state: if Uptime is
+      // configured, activate its widget so it isn't silently hidden after import.
+      else if (uptimeConfig && uptimeConfig.url) {
+        const uw = widgets.find(w => w.id === 'uptime');
+        if (uw && !uw.active) { uw.active = true; await Store.set('gd_widgets', widgets); }
+      }
 
       // Re-render everything
       renderSections();
@@ -1932,6 +2100,8 @@ function importConfig(file) {
       renderCalendar();
       videoCache = {}; loadVideos();
       loadMarkets();
+      renderWidgetLayout();
+      renderModalNav();
 
       // Refresh modal tab if open
       const activeTab = document.querySelector('.modal-tab.active');
@@ -2053,11 +2223,9 @@ async function loadUptime(force = false) {
   const grid    = document.getElementById('uptimeGrid');
   if (!uptimeConfig.url || !uptimeConfig.slug) {
     if (section) section.style.display = 'none';
-    setSidebarSplit(false);
     return;
   }
   if (section) section.style.display = 'flex';
-  setSidebarSplit(true);
   setGlobalDot('loading');
 
   try {
@@ -2074,7 +2242,6 @@ async function loadUptime(force = false) {
     const pageData = await pageRes.json();
     const beatData = beatRes.ok ? await beatRes.json() : {};
 
-    setSidebarSplit(true);
     renderUptimeGrid(pageData, beatData, grid);
   } catch (err) {
     grid.innerHTML = '';
@@ -2085,22 +2252,8 @@ async function loadUptime(force = false) {
     setTimeout(() => {
       if (document.getElementById('uptimeGlobalLabel')?.textContent === t.uptimeError) {
         if (section) section.style.display = 'none';
-        setSidebarSplit(false);
       }
     }, 5000);
-  }
-}
-
-function setSidebarSplit(hasUptime) {
-  const feeds  = document.querySelector('.sidebar-feeds');
-  const uptime = document.querySelector('.sidebar-uptime');
-  if (!feeds || !uptime) return;
-  if (hasUptime) {
-    feeds.style.flex  = '1';
-    uptime.style.flex = '1';
-  } else {
-    feeds.style.flex  = '1';
-    uptime.style.flex = '0';
   }
 }
 
@@ -2235,6 +2388,10 @@ async function saveUptimeConfig() {
     }
     uptimeConfig = { url, slug };
     await Store.set('gd_uptime', uptimeConfig);
+    // Configuring Uptime activates its widget automatically
+    const uw = widgets.find(w => w.id==='uptime');
+    if (uw && !uw.active) { uw.active = true; saveWidgets(); renderModalNav(); }
+    renderWidgetLayout();
     loadUptime(true);
   } catch (err) {
     if (result) {
@@ -2249,6 +2406,9 @@ async function removeUptimeConfig() {
   await Store.set('gd_uptime', uptimeConfig);
   const section = document.getElementById('uptimeSection');
   if (section) section.style.display = 'none';
+  // Removing config deactivates the Uptime widget
+  const uw = widgets.find(w => w.id==='uptime');
+  if (uw && uw.active) { uw.active = false; saveWidgets(); renderModalNav(); renderWidgetLayout(); }
   renderUptimeModal();
   const result = document.getElementById('uptimeTestResult');
   if (result) { result.textContent = t.remove + ' ✓'; result.style.color = 'var(--text-muted)'; }
@@ -2320,7 +2480,7 @@ function updateEditIconPreview(url) {
 // ════════════════════════════════════════════════
 // Fallback only for when the page is opened outside the extension context
 // (e.g. dashboard.html served as a plain file). The real source of truth is manifest.json.
-const APP_VERSION_FALLBACK = '1.8.4';
+const APP_VERSION_FALLBACK = '1.9.0';
 
 function getAppVersion() {
   try {
@@ -2461,6 +2621,7 @@ async function init() {
   applyFontSize(savedFont);
   uptimeConfig = await Store.get('gd_uptime', { url: '', slug: 'default' });
   channels = await Store.get('gd_channels', DEFAULT_CHANNELS);
+  widgets = normalizeWidgets(await Store.get('gd_widgets', null) || DEFAULT_WIDGETS.map(w => ({ ...w })));
   renderAbout();
   renderCalendar();
   renderSections();
@@ -2469,6 +2630,7 @@ async function init() {
   loadUptime();
   loadMarkets();
   loadWeather();
+  renderWidgetLayout();
 
   const badge=document.getElementById('syncBadge');
   // Auto-refresh uptime every 60s

@@ -19,49 +19,56 @@
 <!-- SHELL: sidebar | main | panel -->
 <div class="shell">
 
-  <!-- ── SIDEBAR ── -->
+  <!-- ── SIDEBAR (left widget bar) ── -->
   <aside class="sidebar">
-    <div class="sidebar-top">
-      <div class="clock-big" id="clock">00:00</div>
-      <div class="date-line">
-        <span id="dateDay"></span>
-        <span id="dateMonth"></span>
-      </div>
-      <div class="date-weekday" id="dateWeekday"></div>
-    </div>
-
     <div id="syncBadge" class="sync-badge"></div>
+    <div class="widget-col" id="leftWidgets">
 
-
-
-    <!-- Feeds in sidebar -->
-    <div class="sidebar-feeds">
-      <div class="sb-section-title">
-        <span id="feedSidebarTitle" data-i18n="news"></span>
-        <button class="sb-refresh" id="btnRefreshFeeds" data-i18n-title="refresh">↻</button>
-      </div>
-      <div class="feed-tab-bar" id="feedTabBar"></div>
-      <div id="feedContent" class="feed-content-sidebar">
-        <div class="feed-empty" data-i18n="feedEmpty"></div>
-      </div>
-    </div>
-
-    <!-- Uptime Kuma in sidebar -->
-    <div class="sidebar-uptime" id="uptimeSection" style="display:none">
-      <div class="sb-section-title">
-        <div class="uptime-header-left">
-          <span class="uptime-dot-global" id="uptimeGlobalDot"></span>
-          <span data-i18n="uptime"></span>
-          <span class="uptime-global-label" id="uptimeGlobalLabel"></span>
+      <!-- Widget: Clock -->
+      <section class="widget" id="w-clock" data-widget="clock">
+        <div class="sidebar-top">
+          <div class="clock-big" id="clock">00:00</div>
+          <div class="date-line">
+            <span id="dateDay"></span>
+            <span id="dateMonth"></span>
+          </div>
+          <div class="date-weekday" id="dateWeekday"></div>
         </div>
-        <div style="display:flex;gap:6px;align-items:center">
-          <button class="sb-refresh" id="btnRefreshUptime">↻</button>
-          <button class="sb-refresh" id="btnManageUptime" style="font-size:11px">⚙</button>
-        </div>
-      </div>
-      <div class="uptime-grid" id="uptimeGrid"></div>
-    </div>
+      </section>
 
+      <!-- Widget: Feeds RSS -->
+      <section class="widget widget-grow" id="w-feeds" data-widget="feeds">
+        <div class="sidebar-feeds">
+          <div class="sb-section-title">
+            <span id="feedSidebarTitle" data-i18n="news"></span>
+            <button class="sb-refresh" id="btnRefreshFeeds" data-i18n-title="refresh">↻</button>
+          </div>
+          <div class="feed-tab-bar" id="feedTabBar"></div>
+          <div id="feedContent" class="feed-content-sidebar">
+            <div class="feed-empty" data-i18n="feedEmpty"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Widget: Uptime Kuma -->
+      <section class="widget" id="w-uptime" data-widget="uptime">
+        <div class="sidebar-uptime" id="uptimeSection" style="display:none">
+          <div class="sb-section-title">
+            <div class="uptime-header-left">
+              <span class="uptime-dot-global" id="uptimeGlobalDot"></span>
+              <span data-i18n="uptime"></span>
+              <span class="uptime-global-label" id="uptimeGlobalLabel"></span>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <button class="sb-refresh" id="btnRefreshUptime">↻</button>
+              <button class="sb-refresh" id="btnManageUptime" style="font-size:11px">⚙</button>
+            </div>
+          </div>
+          <div class="uptime-grid" id="uptimeGrid"></div>
+        </div>
+      </section>
+
+    </div>
   </aside>
 
   <!-- ── MAIN (links area) ── -->
@@ -90,53 +97,59 @@
     </div>
   </main>
 
-  <!-- ── RIGHT PANEL ── -->
+  <!-- ── RIGHT PANEL (right widget bar) ── -->
   <aside class="panel">
-    <div class="panel-clock">
-      <div class="panel-greeting" id="greetSub"></div>
-    </div>
+    <div class="widget-col" id="rightWidgets">
 
-    <div>
-      <div class="sec-head"><span class="sec-title" data-i18n="weather"></span></div>
-      <div class="weather-card">
-        <div class="weather-temp">—<sup>°C</sup></div>
-        <div class="weather-desc" id="weatherDesc">Valencia, España</div>
-        <div class="weather-row">
-          <div class="wstat"><div class="wstat-l" data-i18n="wind"></div><div class="wstat-v" id="wWind">—</div></div>
-          <div class="wstat"><div class="wstat-l" data-i18n="humidity"></div><div class="wstat-v" id="wHum">—</div></div>
-          <div class="wstat"><div class="wstat-l" data-i18n="feelsLike"></div><div class="wstat-v" id="wFeel">—</div></div>
+      <!-- Widget: Weather -->
+      <section class="widget" id="w-weather" data-widget="weather">
+        <div class="sec-head"><span class="sec-title" data-i18n="weather"></span></div>
+        <div class="weather-card">
+          <div class="weather-temp">—<sup>°C</sup></div>
+          <div class="weather-desc" id="weatherDesc">Valencia, España</div>
+          <div class="weather-row">
+            <div class="wstat"><div class="wstat-l" data-i18n="wind"></div><div class="wstat-v" id="wWind">—</div></div>
+            <div class="wstat"><div class="wstat-l" data-i18n="humidity"></div><div class="wstat-v" id="wHum">—</div></div>
+            <div class="wstat"><div class="wstat-l" data-i18n="feelsLike"></div><div class="wstat-v" id="wFeel">—</div></div>
+          </div>
         </div>
-      </div>
-    </div>
+      </section>
 
-    <div>
-      <div class="sec-head">
-        <span class="sec-title" data-i18n="calendar"></span>
-        <div style="display:flex;gap:10px;align-items:center">
-          <button class="sb-refresh" id="calPrev">‹</button>
-          <span id="calMonthLabel" style="font-size:10px;color:var(--text-secondary);font-family:var(--font-mono)"></span>
-          <button class="sb-refresh" id="calNext">›</button>
+      <!-- Widget: Calendar -->
+      <section class="widget" id="w-calendar" data-widget="calendar">
+        <div class="sec-head">
+          <span class="sec-title" data-i18n="calendar"></span>
+          <div style="display:flex;gap:10px;align-items:center">
+            <button class="sb-refresh" id="calPrev">‹</button>
+            <span id="calMonthLabel" style="font-size:10px;color:var(--text-secondary);font-family:var(--font-mono)"></span>
+            <button class="sb-refresh" id="calNext">›</button>
+          </div>
         </div>
-      </div>
-      <div class="calendar" id="calGrid"></div>
-    </div>
+        <div class="calendar" id="calGrid"></div>
+      </section>
 
-    <div>
-      <div class="sec-head">
-        <span class="sec-title" data-i18n="markets"></span>
-        <div style="display:flex;gap:8px;align-items:center">
-          <button class="sb-refresh" id="btnRefreshMarkets" data-i18n-title="refresh">↻</button>
-          <button class="sb-refresh" id="btnManageMarkets" data-i18n-title="manage" style="font-size:11px">⚙</button>
+      <!-- Widget: Markets -->
+      <section class="widget" id="w-markets" data-widget="markets">
+        <div class="sec-head">
+          <span class="sec-title" data-i18n="markets"></span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="sb-refresh" id="btnRefreshMarkets" data-i18n-title="refresh">↻</button>
+            <button class="sb-refresh" id="btnManageMarkets" data-i18n-title="manage" style="font-size:11px">⚙</button>
+          </div>
         </div>
-      </div>
-      <div class="stock-list" id="marketsList">
-        <div class="feed-empty" data-i18n="loading"></div>
-      </div>
-    </div>
+        <div class="stock-list" id="marketsList">
+          <div class="feed-empty" data-i18n="loading"></div>
+        </div>
+      </section>
 
-    <div class="note-wrap">
-      <div class="sec-head"><span class="sec-title" data-i18n="quickNote"></span></div>
-      <textarea class="note-input" id="notepad" data-i18n-placeholder="writeSomething" placeholder=""></textarea>
+      <!-- Widget: Quick Note -->
+      <section class="widget widget-grow" id="w-note" data-widget="note">
+        <div class="note-wrap">
+          <div class="sec-head"><span class="sec-title" data-i18n="quickNote"></span></div>
+          <textarea class="note-input" id="notepad" data-i18n-placeholder="writeSomething" placeholder=""></textarea>
+        </div>
+      </section>
+
     </div>
   </aside>
 </div>
@@ -150,27 +163,15 @@
     </div>
     <div class="modal-main">
     <nav class="modal-tabs">
+      <!-- Group: General -->
       <div class="modal-tab active" data-tab="links">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
         <span data-i18n="links"></span>
-      </div>
-      <div class="modal-tab" data-tab="feeds">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 019 9"/><path d="M4 4a16 16 0 0116 16"/><circle cx="5" cy="19" r="1.4" fill="currentColor" stroke="none"/></svg>
-        <span data-i18n="feedsRss"></span>
-      </div>
-      <div class="modal-tab" data-tab="markets">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 7l-7.5 7.5-4-4L2 19"/><path d="M16 7h6v6"/></svg>
-        <span data-i18n="markets"></span>
       </div>
       <div class="modal-tab" data-tab="videos">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4.5" width="19" height="15" rx="3.5"/><path d="M10.5 9.2l4.6 2.8-4.6 2.8z"/></svg>
         <span data-i18n="videos"></span>
       </div>
-      <div class="modal-tab" data-tab="uptime">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 8.5L9 3.5 6 12H2"/></svg>
-        <span data-i18n="uptime"></span>
-      </div>
-      <div class="modal-tabs-sep"></div>
       <div class="modal-tab" data-tab="engine">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5l-4.2-4.2"/></svg>
         <span data-i18n="searchEngine"></span>
@@ -183,6 +184,27 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3.2 9.5h17.6M3.2 14.5h17.6"/><path d="M12 3a14 14 0 010 18a14 14 0 010-18z"/></svg>
         <span data-i18n="language"></span>
       </div>
+      <div class="modal-tab" data-tab="widgets">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        <span data-i18n="widgets"></span>
+      </div>
+
+      <!-- Group: Widgets (config of active widgets only) -->
+      <div class="modal-tabs-sep" id="navSepWidgets"></div>
+      <div class="modal-tab" data-tab="feeds" data-widget-tab="feeds">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 019 9"/><path d="M4 4a16 16 0 0116 16"/><circle cx="5" cy="19" r="1.4" fill="currentColor" stroke="none"/></svg>
+        <span data-i18n="feedsRss"></span>
+      </div>
+      <div class="modal-tab" data-tab="uptime" data-widget-tab="uptime">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 8.5L9 3.5 6 12H2"/></svg>
+        <span data-i18n="uptime"></span>
+      </div>
+      <div class="modal-tab" data-tab="markets" data-widget-tab="markets">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 7l-7.5 7.5-4-4L2 19"/><path d="M16 7h6v6"/></svg>
+        <span data-i18n="markets"></span>
+      </div>
+
+      <!-- Group: About -->
       <div class="modal-tabs-sep"></div>
       <div class="modal-tab" data-tab="about">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16.5v-5"/><path d="M12 8h.01"/></svg>
@@ -424,6 +446,12 @@
       <div class="modal-panel" id="tab-lang">
         <p class="hint-text" data-i18n="langHint"></p>
         <div class="item-list" id="langList"></div>
+      </div>
+
+      <!-- TAB WIDGETS (manager) -->
+      <div class="modal-panel" id="tab-widgets">
+        <p class="hint-text" data-i18n="widgetsHint"></p>
+        <div class="widget-manager" id="widgetManager"></div>
       </div>
 
       <!-- TAB ACERCA DE -->
