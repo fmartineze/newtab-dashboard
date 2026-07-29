@@ -1,4 +1,4 @@
-[🇬🇧 English version](README.en.md)
+[🇷🇺 Русский](README.ru.md) · [🇬🇧 English](README.en.md) · [🇪🇸 Español](README.md)
 
 # NewTab Dashboard
 
@@ -108,6 +108,14 @@ Para cambiar la ciudad del clima, edita las coordenadas en `dashboard.js` (busca
 | RSS | Proxy CORS [rss2json](https://rss2json.com/) |
 | Iconos | [Simple Icons](https://simpleicons.org/) CDN + favicon como fallback |
 | Uptime | [Uptime Kuma](https://github.com/louislam/uptime-kuma) Status Page pública |
+
+---
+
+## Colaboradores
+
+Gracias a quienes han contribuido — la lista completa está en [CONTRIBUTORS.md](CONTRIBUTORS.md).
+
+- **[@Nikitamce](https://github.com/Nikitamce)** — traducción al ruso e internacionalización (i18n).
 
 ---
 
