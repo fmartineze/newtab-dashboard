@@ -56,6 +56,9 @@ if (USE_SYNC) {
     if (changes.gd_theme)    applyTheme(changes.gd_theme.newValue, false);
     if (changes.gd_fontsize) applyFontSize(changes.gd_fontsize.newValue, false);
     if (changes.gd_uptime)   { uptimeConfig = changes.gd_uptime.newValue; loadUptime(); }
+    if (changes.gd_proxmox)  { proxmoxConfig = changes.gd_proxmox.newValue; loadProxmox(); }
+    if (changes.gd_docker)   { dockerConfig = changes.gd_docker.newValue; loadDocker(); }
+    if (changes.gd_pihole)   { piholeConfig = changes.gd_pihole.newValue; piholeSid = null; loadPihole(); }
     if (changes.gd_widgets)  { widgets = normalizeWidgets(changes.gd_widgets.newValue); renderWidgetLayout(); renderModalNav(); renderWidgetsModal(); }
     showSyncBadge('synced');
   });
@@ -132,6 +135,11 @@ const MARKET_PRESETS = [
 const DEFAULT_CHANNELS = [];
 let channels  = DEFAULT_CHANNELS;
 let uptimeConfig = { url: '', slug: 'default' }; // Uptime Kuma
+let proxmoxConfig = { url: '', tokenId: '', tokenSecret: '', name: '', selected: [] }; // Proxmox VE (selected = vmids to detail)
+let proxmoxVms = []; // last fetched guest list, for the config selection UI
+let dockerConfig  = { url: '', apiKey: '', endpointId: '', name: '' };   // Portainer (endpointId auto-detected if empty)
+let piholeConfig  = { url: '', password: '' };                 // Pi-hole v6
+let piholeSid = null; // Pi-hole v6 session id — kept in memory only, never persisted
 let videoCache = {};   // channelId → [{title,link,thumb,age}]
 
 let markets   = DEFAULT_MARKETS;
@@ -148,20 +156,26 @@ let feedCache    = {};
 //  the settings tab id (or null if the widget has no configuration).
 // ════════════════════════════════════════════════
 const WIDGETS = [
-  { id:'clock',    i18n:'clockWidget', configTab:null },
-  { id:'feeds',    i18n:'news',        configTab:'feeds' },
-  { id:'uptime',   i18n:'uptime',      configTab:'uptime' },
-  { id:'weather',  i18n:'weather',     configTab:null },
-  { id:'calendar', i18n:'calendar',    configTab:null },
-  { id:'markets',  i18n:'markets',     configTab:'markets' },
-  { id:'note',     i18n:'quickNote',   configTab:null },
+  { id:'clock',    i18n:'clockWidget',   configTab:null },
+  { id:'feeds',    i18n:'news',          configTab:'feeds' },
+  { id:'uptime',   i18n:'uptime',        configTab:'uptime' },
+  { id:'proxmox',  i18n:'proxmoxWidget', configTab:'proxmox' },
+  { id:'docker',   i18n:'dockerWidget',  configTab:'docker' },
+  { id:'pihole',   i18n:'piholeWidget',  configTab:'pihole' },
+  { id:'weather',  i18n:'weather',       configTab:null },
+  { id:'calendar', i18n:'calendar',      configTab:null },
+  { id:'markets',  i18n:'markets',       configTab:'markets' },
+  { id:'note',     i18n:'quickNote',     configTab:null },
 ];
 // Default layout replicates the pre-widget-manager dashboard exactly.
-// Uptime starts inactive (it was hidden until configured).
+// Uptime and the homelab widgets start inactive (they need configuration first).
 const DEFAULT_WIDGETS = [
   { id:'clock',    active:true,  col:'left'  },
   { id:'feeds',    active:true,  col:'left'  },
   { id:'uptime',   active:false, col:'left'  },
+  { id:'proxmox',  active:false, col:'left'  },
+  { id:'docker',   active:false, col:'left'  },
+  { id:'pihole',   active:false, col:'right' },
   { id:'weather',  active:true,  col:'right' },
   { id:'calendar', active:true,  col:'right' },
   { id:'markets',  active:true,  col:'right' },
@@ -196,6 +210,9 @@ async function saveWidgets() {
   showSyncBadge('syncing');
   await Store.set('gd_widgets', widgets);
 }
+async function saveProxmoxStore() { showSyncBadge('syncing'); await Store.set('gd_proxmox', proxmoxConfig); }
+async function saveDockerStore()  { showSyncBadge('syncing'); await Store.set('gd_docker',  dockerConfig); }
+async function savePiholeStore()  { showSyncBadge('syncing'); await Store.set('gd_pihole',  piholeConfig); }
 
 
 // ════════════════════════════════════════════════
@@ -310,6 +327,9 @@ const LANGUAGES = {
     uptime:         'Uptime',
     uptimeHint:     'Conecta con tu instancia de Uptime Kuma a través de una Status Page pública. No requiere credenciales.',
     uptimeUrl:      'URL de Uptime Kuma',
+    uptimeMode:     'Formato',
+    uptimeExtended: 'Extendido',
+    uptimeCompact:  'Compacto',
     save:           'Guardar',
     remove:         'Eliminar',
     uptimeAllUp:    'Todos operativos',
@@ -323,6 +343,41 @@ const LANGUAGES = {
     clockWidget:      'Reloj',
     colLeft:          'Izquierda',
     colRight:         'Derecha',
+    // Homelab widgets
+    proxmoxWidget:    'Proxmox',
+    dockerWidget:     'Docker',
+    piholeWidget:     'Pi-hole',
+    proxmoxHint:      'Estado de las VMs y contenedores LXC de tu clúster Proxmox VE mediante un API Token (solo lectura). Requiere HTTPS accesible desde el navegador.',
+    proxmoxSetup:     '<strong>Cómo generar el token</strong><ol class="svc-steps"><li>En Proxmox: <em>Centro de datos → Permisos → Tokens de API → Añadir</em>.</li><li>Elige el usuario (p. ej. <em>root@pam</em>) y un nombre de token. <strong>Desmarca «Separación de privilegios»</strong> y copia el secreto (solo se muestra una vez).</li><li>El <strong>ID del Token</strong> es <em>usuario@realm!nombre</em> (p. ej. <em>root@pam!dashboard</em>); el <strong>Secreto</strong> es el UUID mostrado.</li><li>Si ves <em>0/0</em>, el token no tiene permisos: en <em>Permisos → Añadir → Permiso de token de API</em>, ruta <em>/</em>, rol <strong>PVEAuditor</strong>.</li></ol>',
+    dockerHint:       'Estado de los contenedores Docker a través de la API de Portainer, usando una API Key.',
+    dockerSetup:      '<strong>Cómo obtener la API Key</strong><ol class="svc-steps"><li>En Portainer, arriba a la derecha: <em>tu usuario → My account → Access tokens → Add access token</em>.</li><li>Copia el token generado (empieza por <em>ptr_</em>). <strong>Ese</strong> es la API Key — no una URL.</li><li><strong>Endpoint ID</strong>: es el número del entorno en Portainer (normalmente <em>1</em>). <strong>Déjalo vacío para detectarlo automáticamente.</strong></li></ol>',
+    piholeHint:       'Estadísticas de Pi-hole v6 (consultas y bloqueos). Introduce la contraseña de la aplicación de Pi-hole.',
+    proxmoxTokenId:   'ID del Token (usuario@realm!nombre)',
+    proxmoxSecret:    'Secreto del Token',
+    dockerApiKey:     'API Key',
+    dockerEndpoint:   'Endpoint ID',
+    piholePassword:   'Contraseña de la app',
+    proxmoxVms:       'VMs/CT encontrados',
+    dockerContainers: 'contenedores',
+    dockerRunning:    'Contenedores',
+    dockerStopped:    'Parados',
+    dockerImages:     'Imágenes',
+    proxmoxVmsLabel:  'VMs',
+    proxmoxMonitor:   'Monitorizar VMs (opcional)',
+    proxmoxSelectHint:'Selecciona qué VMs mostrar en detalle bajo las estadísticas.',
+    piholeQueries:    'Consultas',
+    piholeBlocked:    'Bloqueadas',
+    piholeDomains:    'Dominios',
+    piholeBlockPct:   'Bloqueo',
+    // Service (self-hosted) shared
+    svcUrl:           'URL del servidor',
+    svcName:          'Nombre (opcional)',
+    svcFillFields:    'Rellena la URL y las credenciales.',
+    svcConnError:     'No se pudo conectar (¿certificado o URL?)',
+    svcHttpError:     'Error del servidor',
+    svcAuthError:     'Credenciales no válidas',
+    svcTimeout:       'Tiempo de espera agotado',
+    svcOpenUrl:       'Abrir URL y aceptar el certificado',
     // Tab Acerca de
     about:            'Acerca de',
     aboutTagline:     'Nueva pestaña minimalista para Firefox',
@@ -501,6 +556,9 @@ const LANGUAGES = {
     uptime:         'Uptime',
     uptimeHint:     'Connect to your Uptime Kuma instance via a public Status Page. No credentials required.',
     uptimeUrl:      'Uptime Kuma URL',
+    uptimeMode:     'Layout',
+    uptimeExtended: 'Extended',
+    uptimeCompact:  'Compact',
     save:           'Save',
     remove:         'Remove',
     uptimeAllUp:    'All operational',
@@ -514,6 +572,41 @@ const LANGUAGES = {
     clockWidget:      'Clock',
     colLeft:          'Left',
     colRight:         'Right',
+    // Homelab widgets
+    proxmoxWidget:    'Proxmox',
+    dockerWidget:     'Docker',
+    piholeWidget:     'Pi-hole',
+    proxmoxHint:      'Status of your Proxmox VE cluster VMs and LXC containers via a (read-only) API Token. Requires HTTPS reachable from the browser.',
+    proxmoxSetup:     '<strong>How to generate the token</strong><ol class="svc-steps"><li>In Proxmox: <em>Datacenter → Permissions → API Tokens → Add</em>.</li><li>Pick the user (e.g. <em>root@pam</em>) and a token name. <strong>Uncheck “Privilege Separation”</strong> and copy the secret (shown only once).</li><li>The <strong>Token ID</strong> is <em>user@realm!name</em> (e.g. <em>root@pam!dashboard</em>); the <strong>Secret</strong> is the shown UUID.</li><li>If you see <em>0/0</em>, the token has no permissions: under <em>Permissions → Add → API Token Permission</em>, path <em>/</em>, role <strong>PVEAuditor</strong>.</li></ol>',
+    dockerHint:       'Status of your Docker containers through the Portainer API, using an API key.',
+    dockerSetup:      '<strong>How to get the API key</strong><ol class="svc-steps"><li>In Portainer, top-right: <em>your user → My account → Access tokens → Add access token</em>.</li><li>Copy the generated token (starts with <em>ptr_</em>). <strong>That</strong> is the API key — not a URL.</li><li><strong>Endpoint ID</strong>: the environment number in Portainer (usually <em>1</em>). <strong>Leave it blank to auto-detect.</strong></li></ol>',
+    piholeHint:       'Pi-hole v6 statistics (queries and blocking). Enter your Pi-hole app password.',
+    proxmoxTokenId:   'Token ID (user@realm!name)',
+    proxmoxSecret:    'Token secret',
+    dockerApiKey:     'API key',
+    dockerEndpoint:   'Endpoint ID',
+    piholePassword:   'App password',
+    proxmoxVms:       'VMs/CTs found',
+    dockerContainers: 'containers',
+    dockerRunning:    'Containers',
+    dockerStopped:    'Stopped',
+    dockerImages:     'Images',
+    proxmoxVmsLabel:  'VMs',
+    proxmoxMonitor:   'Monitor VMs (optional)',
+    proxmoxSelectHint:'Choose which VMs to show in detail below the stats.',
+    piholeQueries:    'Queries',
+    piholeBlocked:    'Blocked',
+    piholeDomains:    'Domains',
+    piholeBlockPct:   'Blocked',
+    // Service (self-hosted) shared
+    svcUrl:           'Server URL',
+    svcName:          'Name (optional)',
+    svcFillFields:    'Fill in the URL and credentials.',
+    svcConnError:     'Could not connect (certificate or URL?)',
+    svcHttpError:     'Server error',
+    svcAuthError:     'Invalid credentials',
+    svcTimeout:       'Request timed out',
+    svcOpenUrl:       'Open URL and accept the certificate',
     // Tab About
     about:            'About',
     aboutTagline:     'A minimal new tab for Firefox',
@@ -622,12 +715,32 @@ const LANGUAGES = {
     appearance: 'Внешний вид', theme: 'Тема', themeHint: 'Настройте цветовую палитру интерфейса.',
     fontSize: 'Размер шрифта', editLink: 'Редактировать ссылку', alertAddLink: 'Заполните название и URL.',
     uptime: 'Uptime', uptimeHint: 'Подключите свой экземпляр Uptime Kuma через публичную Status Page. Учётные данные не требуются.',
-    uptimeUrl: 'URL Uptime Kuma', save: 'Сохранить', remove: 'Удалить',
+    uptimeUrl: 'URL Uptime Kuma', uptimeMode: 'Формат', uptimeExtended: 'Расширенный', uptimeCompact: 'Компактный',
+    save: 'Сохранить', remove: 'Удалить',
     uptimeAllUp: 'Все работают', uptimePartial: 'Частичные сбои', uptimeDown: 'Активный инцидент',
     uptimeError: 'Ошибка подключения', uptimeLoading: 'Подключение…',
     widgets: 'Виджеты',
     widgetsHint: 'Включайте или отключайте виджеты, выбирайте, в какой панели они отображаются (слева или справа) и их порядок. На дашборде показываются только активные виджеты.',
     clockWidget: 'Часы', colLeft: 'Слева', colRight: 'Справа',
+    proxmoxWidget: 'Proxmox', dockerWidget: 'Docker', piholeWidget: 'Pi-hole',
+    proxmoxHint: 'Состояние ВМ и LXC-контейнеров кластера Proxmox VE через API-токен (только чтение). Требуется HTTPS, доступный из браузера.',
+    proxmoxSetup: '<strong>Как создать токен</strong><ol class="svc-steps"><li>В Proxmox: <em>Датацентр → Разрешения → Токены API → Добавить</em>.</li><li>Выберите пользователя (напр. <em>root@pam</em>) и имя токена. <strong>Снимите «Разделение привилегий»</strong> и скопируйте секрет (показывается один раз).</li><li><strong>ID токена</strong> — это <em>user@realm!name</em> (напр. <em>root@pam!dashboard</em>); <strong>Секрет</strong> — показанный UUID.</li><li>Если видите <em>0/0</em>, у токена нет прав: в <em>Разрешения → Добавить → Разрешение токена API</em>, путь <em>/</em>, роль <strong>PVEAuditor</strong>.</li></ol>',
+    dockerHint: 'Состояние Docker-контейнеров через API Portainer с помощью API-ключа.',
+    dockerSetup: '<strong>Как получить API-ключ</strong><ol class="svc-steps"><li>В Portainer, справа вверху: <em>ваш пользователь → My account → Access tokens → Add access token</em>.</li><li>Скопируйте токен (начинается с <em>ptr_</em>). <strong>Это</strong> и есть API-ключ — не URL.</li><li><strong>Endpoint ID</strong>: номер окружения в Portainer (обычно <em>1</em>). <strong>Оставьте пустым для автоопределения.</strong></li></ol>',
+    piholeHint: 'Статистика Pi-hole v6 (запросы и блокировки). Введите пароль приложения Pi-hole.',
+    proxmoxTokenId: 'ID токена (user@realm!name)', proxmoxSecret: 'Секрет токена',
+    dockerApiKey: 'API-ключ', dockerEndpoint: 'Endpoint ID', piholePassword: 'Пароль приложения',
+    proxmoxVms: 'ВМ/CT найдено', dockerContainers: 'контейнеров',
+    dockerRunning: 'Контейнеры', dockerStopped: 'Остановлено', dockerImages: 'Образы',
+    proxmoxVmsLabel: 'ВМ', proxmoxMonitor: 'Мониторинг ВМ (опц.)',
+    proxmoxSelectHint: 'Выберите, какие ВМ показывать подробно под статистикой.',
+    piholeQueries: 'Запросы', piholeBlocked: 'Заблокировано', piholeDomains: 'Домены', piholeBlockPct: 'Блокировка',
+    svcUrl: 'URL сервера',
+    svcName: 'Имя (опц.)',
+    svcFillFields: 'Заполните URL и учётные данные.',
+    svcConnError: 'Не удалось подключиться (сертификат или URL?)',
+    svcHttpError: 'Ошибка сервера', svcAuthError: 'Неверные учётные данные',
+    svcTimeout: 'Превышено время ожидания', svcOpenUrl: 'Открыть URL и принять сертификат',
     about: 'О программе', aboutTagline: 'Минималистичная новая вкладка для Firefox',
     aboutProject: 'Проект', aboutDeveloper: 'Разработчик', aboutVersionLabel: 'Версия',
     aboutContributors: 'Соавторы', aboutContributorsLink: 'Посмотреть соавторов',
@@ -1193,6 +1306,9 @@ function switchTab(tab) {
   if (tab==='engine')  renderEngineModal();
   if (tab==='lang')    renderLangModal();
   if (tab==='uptime')  renderUptimeModal();
+  if (tab==='proxmox') renderProxmoxModal();
+  if (tab==='docker')  renderDockerModal();
+  if (tab==='pihole')  renderPiholeModal();
   if (tab==='videos')  renderVideoChannelModal();
   if (tab==='widgets') renderWidgetsModal();
   if (tab==='about')   renderAbout();
@@ -2038,6 +2154,10 @@ function exportConfig() {
     markets,
     channels,
     widgets,
+    // Homelab widget configs WITHOUT their secrets — never write tokens to a file
+    proxmox:  { url: proxmoxConfig.url, tokenId: proxmoxConfig.tokenId, tokenSecret: '', name: proxmoxConfig.name, selected: proxmoxConfig.selected },
+    docker:   { url: dockerConfig.url,  apiKey: '', endpointId: dockerConfig.endpointId, name: dockerConfig.name },
+    pihole:   { url: piholeConfig.url,  password: '' },
     wall:     { ...wallSettings, src: null }, // skip image URL if any — user can re-add
   };
   // Include wall src only if it's a URL (not base64)
@@ -2085,6 +2205,17 @@ function importConfig(file) {
       if (config.theme)    { applyTheme(config.theme); }
       if (config.fontsize) { applyFontSize(config.fontsize); }
       if (config.uptime)   { uptimeConfig = config.uptime; await Store.set('gd_uptime', uptimeConfig); loadUptime(true); }
+      // Homelab configs: backups carry no secrets, so keep any existing local secret
+      // rather than blanking it. mergeSvc applies imported fields but preserves
+      // non-empty local values for the listed secret keys when the import is empty.
+      const mergeSvc = (cur, inc, secrets) => {
+        const out = { ...cur, ...inc };
+        secrets.forEach(k => { if (!inc[k] && cur[k]) out[k] = cur[k]; });
+        return out;
+      };
+      if (config.proxmox)  { proxmoxConfig = mergeSvc(proxmoxConfig, config.proxmox, ['tokenSecret']); await Store.set('gd_proxmox', proxmoxConfig); loadProxmox(); }
+      if (config.docker)   { dockerConfig  = mergeSvc(dockerConfig,  config.docker,  ['apiKey']);      await Store.set('gd_docker',  dockerConfig);  loadDocker(); }
+      if (config.pihole)   { piholeConfig  = mergeSvc(piholeConfig,  config.pihole,  ['password']);    piholeSid = null; await Store.set('gd_pihole', piholeConfig); loadPihole(); }
       if (config.wall)     { wallSettings = { ...DEFAULT_WALL, ...config.wall }; await Store.set('gd_wall', wallSettings); applyWallSettings(wallSettings); }
       if (config.widgets)  { widgets = normalizeWidgets(config.widgets); await Store.set('gd_widgets', widgets); }
       // Older backups (pre-widget-manager) carry no widget state: if Uptime is
@@ -2243,6 +2374,7 @@ async function loadUptime(force = false) {
     const beatData = beatRes.ok ? await beatRes.json() : {};
 
     renderUptimeGrid(pageData, beatData, grid);
+    applyUptimeMode();
   } catch (err) {
     grid.innerHTML = '';
     setGlobalDot('unknown');
@@ -2363,6 +2495,18 @@ function renderUptimeModal() {
   if (slugInput) slugInput.value = uptimeConfig.slug || 'default';
   const result = document.getElementById('uptimeTestResult');
   if (result) result.textContent = '';
+  const mode = uptimeConfig.mode || 'extended';
+  document.querySelectorAll('#uptimeModeSel .widget-seg-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+}
+// Compact mode caps the monitor grid height and scrolls; extended shows it all.
+function applyUptimeMode() {
+  const grid = document.getElementById('uptimeGrid');
+  if (grid) grid.classList.toggle('compact', (uptimeConfig.mode || 'extended') === 'compact');
+}
+async function setUptimeMode(mode) {
+  uptimeConfig.mode = (mode === 'compact') ? 'compact' : 'extended';
+  await Store.set('gd_uptime', uptimeConfig);
+  applyUptimeMode(); renderUptimeModal();
 }
 
 async function saveUptimeConfig() {
@@ -2412,6 +2556,408 @@ async function removeUptimeConfig() {
   renderUptimeModal();
   const result = document.getElementById('uptimeTestResult');
   if (result) { result.textContent = t.remove + ' ✓'; result.style.color = 'var(--text-muted)'; }
+}
+
+
+// ════════════════════════════════════════════════
+//  HOMELAB WIDGETS — Proxmox · Docker (Portainer) · Pi-hole
+//  Authenticated self-hosted APIs. Tokens are only ever sent to the host the
+//  user configured; the fetch bypasses CORS via the extension's <all_urls>.
+// ════════════════════════════════════════════════
+
+// fetch() to a self-signed HTTPS host throws a TypeError with no detail. We
+// classify: a thrown error = connection/cert issue (err.http falsy); a non-ok
+// response = HTTP error (err.http true); 401/403 = 'auth'.
+function httpErr(kind) { const e = new Error(String(kind)); e.http = true; return e; }
+async function fetchService(url, opts = {}, timeout = 8000) {
+  try {
+    return await fetch(url, { ...opts, signal: AbortSignal.timeout(timeout) });
+  } catch (err) {
+    const e = new Error(err && err.name === 'TimeoutError' ? 'timeout' : 'connection');
+    e.http = false; // network/TLS/cert failure — browser hides the specifics
+    throw e;
+  }
+}
+function svcErrText(err) {
+  if (err && err.message === 'auth')    return t.svcAuthError;
+  if (err && err.message === 'timeout') return t.svcTimeout;
+  if (err && err.http)                  return t.svcHttpError + ' ' + err.message;
+  return t.svcConnError;
+}
+
+// Shared header dot/label for the service widgets (reuses the Uptime header markup)
+function setSvcDot(svc, state, label) {
+  const dot = document.getElementById(svc + 'Dot');
+  const lbl = document.getElementById(svc + 'Label');
+  if (dot) {
+    dot.className = 'uptime-dot-global';
+    if (state === 'up' || state === 'down' || state === 'partial') dot.classList.add(state);
+  }
+  if (lbl) lbl.textContent = label || '';
+}
+// Header title: widget name, plus ": <server name>" when the user set one.
+function setSvcTitle(svc, i18nKey, name) {
+  const el = document.getElementById(svc + 'Title');
+  if (el) el.textContent = t[i18nKey] + (name ? ':' : '');
+}
+// On failure: clear the widget body, mark the dot down and offer a link to open
+// the URL (so the user can accept a self-signed cert), for connection errors only.
+function svcError(svc, container, cfg, err) {
+  if (container) container.innerHTML = '';
+  setSvcDot(svc, 'down', svcErrText(err));
+  if (container && (!err || !err.http) && cfg.url) {
+    const a = document.createElement('a');
+    a.href = cfg.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+    a.className = 'svc-cert-link'; a.textContent = t.svcOpenUrl;
+    container.appendChild(a);
+  }
+}
+function svcTestError(result, err, url) {
+  if (!result) return;
+  result.innerHTML = '';
+  const span = document.createElement('span');
+  span.style.color = 'var(--red)'; span.textContent = '✗ ' + svcErrText(err);
+  result.appendChild(span);
+  if ((!err || !err.http) && url) {
+    result.appendChild(document.createTextNode('  '));
+    const a = document.createElement('a');
+    a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+    a.className = 'svc-cert-link'; a.textContent = t.svcOpenUrl;
+    result.appendChild(a);
+  }
+}
+function svcMsg(el, text, color) {
+  if (!el) return; el.textContent = text;
+  el.style.color = color === 'red' ? 'var(--red)' : color === 'green' ? 'var(--green)' : 'var(--text-muted)';
+}
+const _v  = id => { const e = document.getElementById(id); return e ? e.value.trim() : ''; };
+const _sv = (id, v) => { const e = document.getElementById(id); if (e) e.value = v || ''; };
+function setWidgetActiveState(id, active) {
+  const w = widgets.find(x => x.id === id); if (!w) return;
+  if (w.active !== active) { w.active = active; saveWidgets(); renderModalNav(); }
+  renderWidgetLayout();
+}
+function svcRow(isUp, midState, name, meta) {
+  const row = document.createElement('div'); row.className = 'uptime-row' + (isUp ? '' : ' down');
+  const line = document.createElement('div'); line.style.cssText = 'display:flex;align-items:center;gap:6px;width:100%;';
+  const dot = document.createElement('div'); dot.className = 'uptime-dot ' + midState;
+  const nm = document.createElement('div'); nm.className = 'uptime-name'; nm.textContent = name; nm.title = name;
+  const mt = document.createElement('div'); mt.className = 'uptime-ping'; mt.textContent = meta;
+  line.appendChild(dot); line.appendChild(nm); line.appendChild(mt);
+  row.appendChild(line); return row;
+}
+// Compact stat tiles (label + value), reused by pihole/proxmox/docker widgets.
+function svcStatTiles(box, tiles) {
+  const row = document.createElement('div'); row.className = 'svc-stats-row';
+  tiles.forEach(x => {
+    const s = document.createElement('div'); s.className = 'wstat';
+    const l = document.createElement('div'); l.className = 'wstat-l'; l.textContent = x.label;
+    const v = document.createElement('div'); v.className = 'wstat-v'; v.textContent = x.value;
+    s.appendChild(l); s.appendChild(v); row.appendChild(s);
+  });
+  box.appendChild(row);
+}
+// Labelled progress bar (turns red past 90%).
+function svcBar(box, label, pct, rightText) {
+  pct = Math.min(100, Math.max(0, pct || 0));
+  const wrap = document.createElement('div'); wrap.className = 'svc-bar-wrap';
+  const lbl = document.createElement('div'); lbl.className = 'svc-bar-label';
+  const ls = document.createElement('span'); ls.textContent = label;
+  const rs = document.createElement('span'); rs.textContent = rightText;
+  lbl.appendChild(ls); lbl.appendChild(rs);
+  const bar = document.createElement('div'); bar.className = 'svc-bar';
+  const fill = document.createElement('div'); fill.className = 'svc-bar-fill'; fill.style.width = pct + '%';
+  if (pct >= 90) fill.style.background = 'var(--red)';
+  bar.appendChild(fill); wrap.appendChild(lbl); wrap.appendChild(bar); box.appendChild(wrap);
+}
+const gbytes = b => (b || 0) / 1073741824;
+
+// ── Proxmox VE ──
+// One call to /cluster/resources returns nodes (host CPU/RAM) and guests (VMs/CTs).
+async function proxmoxFetchResources(base) {
+  const res = await fetchService(base + '/api2/json/cluster/resources',
+    { headers: { 'Authorization': 'PVEAPIToken=' + proxmoxConfig.tokenId + '=' + proxmoxConfig.tokenSecret } });
+  if (res.status === 401) throw httpErr('auth');
+  if (!res.ok) throw httpErr(res.status);
+  const data = await res.json();
+  const items = data.data || [];
+  proxmoxVms = items.filter(i => i.type === 'qemu' || i.type === 'lxc')
+                    .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  return items;
+}
+async function loadProxmox() {
+  const section = document.getElementById('proxmoxSection');
+  const box = document.getElementById('proxmoxStats');
+  if (!proxmoxConfig.url || !proxmoxConfig.tokenId || !proxmoxConfig.tokenSecret) { if (section) section.style.display = 'none'; return; }
+  if (section) section.style.display = 'flex';
+  setSvcDot('proxmox', 'loading', t.uptimeLoading);
+  try {
+    renderProxmoxStats(await proxmoxFetchResources(proxmoxConfig.url.replace(/\/$/, '')), box);
+  } catch (err) { svcError('proxmox', box, proxmoxConfig, err); }
+}
+function renderProxmoxStats(items, box) {
+  box.innerHTML = '';
+  const nodes  = items.filter(i => i.type === 'node' && i.status === 'online');
+  const guests = items.filter(i => i.type === 'qemu' || i.type === 'lxc');
+  const running = guests.filter(g => g.status === 'running');
+  // Host CPU/RAM aggregated across online nodes
+  let maxcpu = 0, cpuAbs = 0, mem = 0, maxmem = 0;
+  nodes.forEach(n => { maxcpu += (n.maxcpu || 0); cpuAbs += (n.cpu || 0) * (n.maxcpu || 0); mem += (n.mem || 0); maxmem += (n.maxmem || 0); });
+  const cpuPct = maxcpu ? cpuAbs / maxcpu * 100 : 0;
+  const ramPct = maxmem ? mem / maxmem * 100 : 0;
+  svcStatTiles(box, [
+    { label: t.proxmoxVmsLabel, value: running.length + '/' + guests.length },
+    { label: 'CPU', value: cpuPct.toFixed(0) + '%' },
+    { label: 'RAM', value: gbytes(mem).toFixed(1) + '/' + gbytes(maxmem).toFixed(0) + ' GB' },
+  ]);
+  svcBar(box, 'CPU', cpuPct, cpuPct.toFixed(0) + '%');
+  svcBar(box, 'RAM', ramPct, ramPct.toFixed(0) + '%');
+  // Optional per-VM detail for the VMs the user selected
+  const sel = proxmoxConfig.selected || [];
+  const selGuests = guests.filter(g => sel.includes(g.vmid));
+  if (selGuests.length) {
+    const list = document.createElement('div'); list.className = 'svc-detail-list';
+    selGuests.forEach(g => {
+      const isUp = g.status === 'running';
+      const meta = (isUp && g.maxmem) ? Math.round(g.mem / g.maxmem * 100) + '% RAM' : g.status;
+      list.appendChild(svcRow(isUp, isUp ? 'up' : 'unknown', g.name || ('VM ' + g.vmid), meta));
+    });
+    box.appendChild(list);
+  }
+  setSvcTitle('proxmox', 'proxmoxWidget', proxmoxConfig.name);
+  setSvcDot('proxmox', running.length === guests.length ? 'up' : running.length === 0 ? 'down' : 'partial', proxmoxConfig.name || '');
+}
+async function saveProxmoxConfig() {
+  const url = _v('pmUrl').replace(/\/$/, ''), tokenId = _v('pmTokenId'), tokenSecret = _v('pmTokenSecret');
+  const result = document.getElementById('proxmoxTestResult');
+  if (!url || !tokenId || !tokenSecret) { svcMsg(result, '⚠ ' + t.svcFillFields, 'red'); return; }
+  svcMsg(result, t.uptimeLoading, 'muted');
+  proxmoxConfig = { url, tokenId, tokenSecret, name: _v('pmName'), selected: proxmoxConfig.selected || [] };
+  try {
+    await proxmoxFetchResources(url); // populates proxmoxVms and validates the token
+    svcMsg(result, '✓ ' + proxmoxVms.length + ' ' + t.proxmoxVms, 'green');
+    await saveProxmoxStore(); setWidgetActiveState('proxmox', true); loadProxmox();
+    renderProxmoxVmList(); // offer VM selection now that we have the list
+  } catch (err) { svcTestError(result, err, url); }
+}
+async function removeProxmoxConfig() {
+  proxmoxConfig = { url: '', tokenId: '', tokenSecret: '', name: '', selected: [] };
+  proxmoxVms = [];
+  await Store.set('gd_proxmox', proxmoxConfig);
+  const s = document.getElementById('proxmoxSection'); if (s) s.style.display = 'none';
+  setWidgetActiveState('proxmox', false); renderProxmoxModal();
+  svcMsg(document.getElementById('proxmoxTestResult'), t.remove + ' ✓', 'muted');
+}
+function renderProxmoxModal() {
+  _sv('pmName', proxmoxConfig.name); _sv('pmUrl', proxmoxConfig.url); _sv('pmTokenId', proxmoxConfig.tokenId); _sv('pmTokenSecret', proxmoxConfig.tokenSecret);
+  const r = document.getElementById('proxmoxTestResult'); if (r) r.textContent = '';
+  renderProxmoxVmList();
+  // If already configured but the VM list isn't cached yet, fetch it quietly for the selector
+  if (proxmoxConfig.url && proxmoxConfig.tokenId && !proxmoxVms.length) {
+    proxmoxFetchResources(proxmoxConfig.url.replace(/\/$/, '')).then(renderProxmoxVmList).catch(() => {});
+  }
+}
+// VM selection chips in the config tab (optional per-VM detail on the widget)
+function renderProxmoxVmList() {
+  const box = document.getElementById('proxmoxVmList'); if (!box) return;
+  if (!proxmoxVms.length) { box.style.display = 'none'; box.innerHTML = ''; return; }
+  box.style.display = 'block';
+  box.innerHTML = '';
+  const title = document.createElement('div'); title.className = 'add-form-title'; title.textContent = t.proxmoxMonitor;
+  const hint = document.createElement('p'); hint.className = 'hint-text'; hint.textContent = t.proxmoxSelectHint;
+  const grid = document.createElement('div'); grid.className = 'svc-vm-grid';
+  const sel = proxmoxConfig.selected || [];
+  proxmoxVms.forEach(vm => {
+    const on = sel.includes(vm.vmid);
+    const chip = document.createElement('label'); chip.className = 'svc-vm-chip' + (on ? ' on' : '');
+    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = on;
+    cb.addEventListener('change', () => {
+      const s = new Set(proxmoxConfig.selected || []);
+      if (cb.checked) s.add(vm.vmid); else s.delete(vm.vmid);
+      proxmoxConfig.selected = [...s];
+      chip.classList.toggle('on', cb.checked);
+      saveProxmoxStore(); loadProxmox();
+    });
+    const txt = document.createElement('span'); txt.textContent = vm.name || ('VM ' + vm.vmid);
+    chip.appendChild(cb); chip.appendChild(txt); grid.appendChild(chip);
+  });
+  box.appendChild(title); box.appendChild(hint); box.appendChild(grid);
+}
+
+// ── Docker via Portainer ──
+// Resolve the Portainer environment (endpoint) id: use the configured one, and if
+// it's missing or returns 404, ask /api/endpoints and take the first available.
+async function dockerResolveEndpoint(base, headers) {
+  const r = await fetchService(base + '/api/endpoints', { headers });
+  if (r.status === 401 || r.status === 403) throw httpErr('auth');
+  if (!r.ok) throw httpErr(r.status);
+  const list = await r.json();
+  if (Array.isArray(list) && list.length) return String(list[0].Id);
+  throw httpErr(404);
+}
+// Resolve endpoint (with 404 fallback) and return the Portainer docker proxy base path.
+async function dockerProxyBase(base, headers) {
+  let ep = dockerConfig.endpointId || '';
+  if (!ep) ep = await dockerResolveEndpoint(base, headers);
+  // probe /docker/info; on 404 the endpoint id is wrong → auto-resolve and retry
+  let res = await fetchService(base + '/api/endpoints/' + ep + '/docker/info', { headers });
+  if (res.status === 404) { ep = await dockerResolveEndpoint(base, headers); res = await fetchService(base + '/api/endpoints/' + ep + '/docker/info', { headers }); }
+  if (res.status === 401 || res.status === 403) throw httpErr('auth');
+  if (!res.ok) throw httpErr(res.status);
+  if (ep !== dockerConfig.endpointId) { dockerConfig.endpointId = ep; saveDockerStore(); }
+  return { proxy: base + '/api/endpoints/' + ep + '/docker', info: await res.json() };
+}
+// Host CPU% a running container contributes (0-100 of total host capacity).
+function dockerHostCpuPct(s) {
+  try {
+    const cpuDelta = s.cpu_stats.cpu_usage.total_usage - s.precpu_stats.cpu_usage.total_usage;
+    const sysDelta = s.cpu_stats.system_cpu_usage - s.precpu_stats.system_cpu_usage;
+    if (sysDelta > 0 && cpuDelta > 0) return cpuDelta / sysDelta * 100;
+  } catch (e) {}
+  return 0;
+}
+async function dockerGetStats(base) {
+  const headers = { 'X-API-Key': dockerConfig.apiKey };
+  const { proxy, info } = await dockerProxyBase(base, headers);
+  const out = {
+    total: info.Containers || 0, running: info.ContainersRunning || 0,
+    stopped: info.ContainersStopped || 0, paused: info.ContainersPaused || 0,
+    images: info.Images || 0, memTotal: info.MemTotal || 0,
+  };
+  // Best-effort live CPU/RAM: sum per-running-container one-shot stats. Never fatal.
+  try {
+    const cl = await fetchService(proxy + '/containers/json?filters=' + encodeURIComponent('{"status":["running"]}'), { headers });
+    if (cl.ok) {
+      const ids = (await cl.json() || []).map(c => c.Id).slice(0, 40);
+      const results = await Promise.allSettled(ids.map(id =>
+        fetchService(proxy + '/containers/' + id + '/stats?stream=false', { headers }, 6000).then(r => r.ok ? r.json() : null)));
+      let mem = 0, cpu = 0, any = false;
+      results.forEach(r => {
+        if (r.status === 'fulfilled' && r.value) {
+          any = true; const s = r.value; const ms = s.memory_stats || {};
+          const cache = (ms.stats && (ms.stats.inactive_file ?? ms.stats.cache)) || 0;
+          mem += Math.max(0, (ms.usage || 0) - cache);
+          cpu += dockerHostCpuPct(s);
+        }
+      });
+      if (any) { out.memBytes = mem; out.cpuPct = cpu; }
+    }
+  } catch (e) {}
+  return out;
+}
+async function loadDocker() {
+  const section = document.getElementById('dockerSection');
+  const box = document.getElementById('dockerStats');
+  if (!dockerConfig.url || !dockerConfig.apiKey) { if (section) section.style.display = 'none'; return; }
+  if (section) section.style.display = 'flex';
+  setSvcDot('docker', 'loading', t.uptimeLoading);
+  try {
+    renderDockerStats(await dockerGetStats(dockerConfig.url.replace(/\/$/, '')), box);
+  } catch (err) { svcError('docker', box, dockerConfig, err); }
+}
+function renderDockerStats(s, box) {
+  box.innerHTML = '';
+  svcStatTiles(box, [
+    { label: t.dockerRunning, value: s.running + '/' + s.total },
+    { label: t.dockerStopped, value: String(s.stopped) },
+    { label: t.dockerImages, value: String(s.images) },
+  ]);
+  if (s.memBytes != null && s.memTotal) svcBar(box, 'RAM', s.memBytes / s.memTotal * 100, gbytes(s.memBytes).toFixed(1) + ' GB');
+  if (s.cpuPct != null) svcBar(box, 'CPU', s.cpuPct, s.cpuPct.toFixed(0) + '%');
+  setSvcTitle('docker', 'dockerWidget', dockerConfig.name);
+  setSvcDot('docker', s.running === s.total ? 'up' : s.running === 0 ? 'down' : 'partial', dockerConfig.name || '');
+}
+async function saveDockerConfig() {
+  const url = _v('dkUrl').replace(/\/$/, ''), apiKey = _v('dkApiKey'), endpointId = _v('dkEndpoint');
+  const result = document.getElementById('dockerTestResult');
+  if (!url || !apiKey) { svcMsg(result, '⚠ ' + t.svcFillFields, 'red'); return; }
+  svcMsg(result, t.uptimeLoading, 'muted');
+  dockerConfig = { url, apiKey, endpointId, name: _v('dkName') }; // endpointId may be empty → auto-detected
+  try {
+    const s = await dockerGetStats(url);
+    svcMsg(result, '✓ ' + s.running + '/' + s.total + ' ' + t.dockerContainers, 'green');
+    await saveDockerStore(); setWidgetActiveState('docker', true); loadDocker();
+  } catch (err) { svcTestError(result, err, url); }
+}
+async function removeDockerConfig() {
+  dockerConfig = { url: '', apiKey: '', endpointId: '', name: '' };
+  await Store.set('gd_docker', dockerConfig);
+  const s = document.getElementById('dockerSection'); if (s) s.style.display = 'none';
+  setWidgetActiveState('docker', false); renderDockerModal();
+  svcMsg(document.getElementById('dockerTestResult'), t.remove + ' ✓', 'muted');
+}
+function renderDockerModal() {
+  _sv('dkName', dockerConfig.name); _sv('dkUrl', dockerConfig.url); _sv('dkApiKey', dockerConfig.apiKey); _sv('dkEndpoint', dockerConfig.endpointId);
+  const r = document.getElementById('dockerTestResult'); if (r) r.textContent = '';
+}
+
+// ── Pi-hole v6 (session auth; SID kept in memory only) ──
+async function piholeAuth(base) {
+  const res = await fetchService(base + '/api/auth',
+    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: piholeConfig.password }) });
+  if (res.status === 401) throw httpErr('auth');
+  if (!res.ok) throw httpErr(res.status);
+  const data = await res.json();
+  const sid = data && data.session && data.session.sid;
+  if (!sid || (data.session && data.session.valid === false)) throw httpErr('auth');
+  return sid;
+}
+async function piholeSummary(base) {
+  if (!piholeSid) piholeSid = await piholeAuth(base);
+  let res = await fetchService(base + '/api/stats/summary', { headers: { 'X-FTL-SID': piholeSid } });
+  if (res.status === 401) { piholeSid = await piholeAuth(base); res = await fetchService(base + '/api/stats/summary', { headers: { 'X-FTL-SID': piholeSid } }); }
+  if (!res.ok) throw httpErr(res.status);
+  return res.json();
+}
+async function loadPihole() {
+  const section = document.getElementById('piholeSection');
+  const box = document.getElementById('piholeStats');
+  if (!piholeConfig.url || !piholeConfig.password) { if (section) section.style.display = 'none'; return; }
+  if (section) section.style.display = 'flex';
+  setSvcDot('pihole', 'loading', t.uptimeLoading);
+  try {
+    renderPiholeStats(await piholeSummary(piholeConfig.url.replace(/\/$/, '')), box);
+  } catch (err) { piholeSid = null; svcError('pihole', box, piholeConfig, err); }
+}
+function renderPiholeStats(data, box) {
+  box.innerHTML = '';
+  const q = (data && data.queries) || {}, g = (data && data.gravity) || {};
+  const total = q.total ?? 0, blocked = q.blocked ?? 0;
+  const pct = q.percent_blocked != null ? q.percent_blocked : (total ? blocked / total * 100 : 0);
+  const domains = g.domains_being_blocked ?? 0;
+  const fmt = n => (n || 0).toLocaleString(getLocale());
+  svcStatTiles(box, [
+    { label: t.piholeQueries, value: fmt(total) },
+    { label: t.piholeBlocked, value: fmt(blocked) },
+    { label: t.piholeDomains, value: fmt(domains) },
+  ]);
+  svcBar(box, t.piholeBlockPct, pct, pct.toFixed(1) + '%');
+  setSvcDot('pihole', 'up', pct.toFixed(0) + '%');
+}
+async function savePiholeConfig() {
+  const url = _v('phUrl').replace(/\/$/, ''), password = _v('phPassword');
+  const result = document.getElementById('piholeTestResult');
+  if (!url || !password) { svcMsg(result, '⚠ ' + t.svcFillFields, 'red'); return; }
+  svcMsg(result, t.uptimeLoading, 'muted');
+  piholeConfig = { url, password }; piholeSid = null;
+  try {
+    const data = await piholeSummary(url);
+    const q = (data && data.queries) || {};
+    const pct = q.percent_blocked != null ? q.percent_blocked : 0;
+    svcMsg(result, '✓ ' + pct.toFixed(1) + '% ' + t.piholeBlockPct.toLowerCase(), 'green');
+    await savePiholeStore(); setWidgetActiveState('pihole', true); loadPihole();
+  } catch (err) { piholeSid = null; svcTestError(result, err, url); }
+}
+async function removePiholeConfig() {
+  piholeConfig = { url: '', password: '' }; piholeSid = null;
+  await Store.set('gd_pihole', piholeConfig);
+  const s = document.getElementById('piholeSection'); if (s) s.style.display = 'none';
+  setWidgetActiveState('pihole', false); renderPiholeModal();
+  svcMsg(document.getElementById('piholeTestResult'), t.remove + ' ✓', 'muted');
+}
+function renderPiholeModal() {
+  _sv('phUrl', piholeConfig.url); _sv('phPassword', piholeConfig.password);
+  const r = document.getElementById('piholeTestResult'); if (r) r.textContent = '';
 }
 
 
@@ -2480,7 +3026,7 @@ function updateEditIconPreview(url) {
 // ════════════════════════════════════════════════
 // Fallback only for when the page is opened outside the extension context
 // (e.g. dashboard.html served as a plain file). The real source of truth is manifest.json.
-const APP_VERSION_FALLBACK = '1.9.0';
+const APP_VERSION_FALLBACK = '1.10.0';
 
 function getAppVersion() {
   try {
@@ -2569,6 +3115,22 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnRefreshUptime').addEventListener('click', () => loadUptime(true));
   document.getElementById('btnSaveUptime').addEventListener('click', saveUptimeConfig);
   document.getElementById('btnRemoveUptime').addEventListener('click', removeUptimeConfig);
+  document.getElementById('uptimeModeSel').addEventListener('click', e => {
+    const b = e.target.closest('.widget-seg-btn'); if (b) setUptimeMode(b.dataset.mode);
+  });
+  // Homelab widgets (Proxmox / Docker / Pi-hole)
+  document.getElementById('btnManageProxmox').addEventListener('click', () => openModal('proxmox'));
+  document.getElementById('btnRefreshProxmox').addEventListener('click', loadProxmox);
+  document.getElementById('btnSaveProxmox').addEventListener('click', saveProxmoxConfig);
+  document.getElementById('btnRemoveProxmox').addEventListener('click', removeProxmoxConfig);
+  document.getElementById('btnManageDocker').addEventListener('click', () => openModal('docker'));
+  document.getElementById('btnRefreshDocker').addEventListener('click', loadDocker);
+  document.getElementById('btnSaveDocker').addEventListener('click', saveDockerConfig);
+  document.getElementById('btnRemoveDocker').addEventListener('click', removeDockerConfig);
+  document.getElementById('btnManagePihole').addEventListener('click', () => openModal('pihole'));
+  document.getElementById('btnRefreshPihole').addEventListener('click', () => { piholeSid = null; loadPihole(); });
+  document.getElementById('btnSavePihole').addEventListener('click', savePiholeConfig);
+  document.getElementById('btnRemovePihole').addEventListener('click', removePiholeConfig);
   document.getElementById('btnManageMarkets').addEventListener('click', () => openModal('markets'));
   document.getElementById('btnRefreshMarkets').addEventListener('click', loadMarkets);
   document.getElementById('btnAddMarket').addEventListener('click', addMarket);
@@ -2620,6 +3182,9 @@ async function init() {
   const savedFont = await Store.get('gd_fontsize', 'md');
   applyFontSize(savedFont);
   uptimeConfig = await Store.get('gd_uptime', { url: '', slug: 'default' });
+  proxmoxConfig = await Store.get('gd_proxmox', proxmoxConfig);
+  dockerConfig  = await Store.get('gd_docker',  dockerConfig);
+  piholeConfig  = await Store.get('gd_pihole',  piholeConfig);
   channels = await Store.get('gd_channels', DEFAULT_CHANNELS);
   widgets = normalizeWidgets(await Store.get('gd_widgets', null) || DEFAULT_WIDGETS.map(w => ({ ...w })));
   renderAbout();
@@ -2628,13 +3193,16 @@ async function init() {
   renderFeedTabs();
   loadVideos();
   loadUptime();
+  loadProxmox();
+  loadDocker();
+  loadPihole();
   loadMarkets();
   loadWeather();
   renderWidgetLayout();
 
   const badge=document.getElementById('syncBadge');
-  // Auto-refresh uptime every 60s
-  setInterval(() => loadUptime(), 60000);
+  // Auto-refresh the live service widgets every 60s
+  setInterval(() => { loadUptime(); loadProxmox(); loadDocker(); loadPihole(); }, 60000);
   if (badge) {
     if (USE_SYNC) { badge.textContent=t.syncActiveMsg; badge.style.color='var(--green)'; badge.style.opacity='1'; setTimeout(()=>badge.style.opacity='0',3500); }
     else { badge.textContent=t.syncLocalMsg; badge.style.color='var(--text-muted)'; badge.style.opacity='1'; }

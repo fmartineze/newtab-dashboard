@@ -86,6 +86,26 @@ body.no-wall #wallDim  { background:#0a0a0c; }
 .widget-grow { flex:1 1 auto; min-height:200px; display:flex; flex-direction:column; }
 /* Feeds keeps enough height to show ~4 headlines before its internal scroll */
 #w-feeds { min-height:280px; }
+
+/* Homelab widgets — shared stat tiles, bars, detail list + "open URL for cert" link */
+.svc-stats-row { display:flex; gap:14px; padding:2px 0 4px; }
+.svc-bar-wrap { margin-top:8px; }
+.svc-bar-wrap + .svc-bar-wrap { margin-top:6px; }
+.svc-bar-label { display:flex; justify-content:space-between; font-size:9.5px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px; }
+.svc-bar { height:6px; border-radius:3px; background:rgba(255,255,255,0.08); overflow:hidden; }
+.svc-bar-fill { height:100%; border-radius:3px; background:var(--accent-warm); transition:width 0.4s ease; }
+.svc-detail-list { display:flex; flex-direction:column; gap:5px; margin-top:10px; }
+.svc-vm-select { margin-top:12px; padding-top:10px; border-top:1px solid var(--glass-border); }
+.svc-vm-grid { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.svc-vm-chip { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--text-secondary); background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:7px; padding:5px 9px; cursor:pointer; user-select:none; }
+.svc-vm-chip input { accent-color:var(--accent-warm); cursor:pointer; }
+.svc-vm-chip.on { color:var(--accent-warm); border-color:rgba(200,184,154,0.35); background:var(--accent-glow); }
+.svc-cert-link { display:inline-block; margin-top:4px; font-size:10px; color:var(--accent-warm); text-decoration:none; }
+.svc-cert-link:hover { text-decoration:underline; }
+.svc-setup { font-size:10px; color:var(--text-muted); line-height:1.55; margin-top:12px; padding-top:10px; border-top:1px solid var(--glass-border); }
+.svc-setup strong { color:var(--text-secondary); font-weight:400; }
+.svc-setup em { color:var(--accent-warm); font-style:normal; }
+.svc-steps { margin:6px 0 0; padding-left:16px; display:flex; flex-direction:column; gap:4px; }
 /* Extra top clearance on the right bar so the fixed gear button never overlaps */
 #rightWidgets { padding-top:46px; }
 
@@ -647,6 +667,8 @@ body.theme-arctic.no-wall #wallDim { background:#060e12; }
   color: var(--text-muted); letter-spacing: 0.06em;
 }
 
+/* Compact mode: cap the monitor grid height and scroll for the rest */
+.uptime-grid.compact { max-height: 150px; overflow-y: auto; }
 /* Monitor grid */
 .uptime-grid {
   display: flex; flex-direction: column; gap: 4px;

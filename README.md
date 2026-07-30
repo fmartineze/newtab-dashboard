@@ -39,7 +39,8 @@ El dashboard se divide en tres columnas:
 - **Firefox Sync** — La configuración se sincroniza entre dispositivos automáticamente
 - **Iconos automáticos** — Los links sugieren su icono desde Simple Icons al escribir el nombre
 - **Wallpaper personalizable** — URL de imagen o gradiente predefinido, con controles de opacidad, desenfoque, oscurecimiento y tono
-- **Widgets configurables** — Activa, desactiva, mueve entre barras y reordena los widgets del panel (reloj, feeds, clima, calendario, mercados, notas, uptime)
+- **Widgets configurables** — Activa, desactiva, mueve entre barras y reordena los widgets del panel (reloj, feeds, clima, calendario, mercados, notas, Uptime Kuma, Proxmox, Docker, Pi-hole)
+- **Monitorización de tu homelab** — Estado de VMs de Proxmox, contenedores Docker (vía Portainer) y estadísticas de Pi-hole, con uso de CPU y RAM. Las credenciales solo se envían a tus propios servidores
 - **Import / Export** — Guarda y restaura toda tu configuración en un JSON
 - **Multiidioma** — Interfaz en Español, Inglés y Ruso
 - **Sin dependencias** — Vanilla JS, sin frameworks ni bundler
@@ -91,6 +92,7 @@ Toda la configuración se hace desde el botón **⚙** de la interfaz, sin tocar
 - Cambiar el motor de búsqueda
 - Aplicar wallpaper (URL o gradiente) y ajustar sus efectos
 - Gestionar los widgets del panel: activarlos, moverlos entre barras (izquierda/derecha) y reordenarlos
+- Conectar servicios self-hosted: Proxmox (API Token), Docker vía Portainer (API Key) y Pi-hole v6
 - Cambiar el idioma
 - Exportar e importar la configuración completa
 - Consultar la información del proyecto, versión y licencia en la pestaña **Acerca de**

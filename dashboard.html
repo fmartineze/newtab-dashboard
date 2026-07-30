@@ -68,6 +68,42 @@
         </div>
       </section>
 
+      <!-- Widget: Proxmox -->
+      <section class="widget" id="w-proxmox" data-widget="proxmox">
+        <div class="sidebar-uptime" id="proxmoxSection" style="display:none">
+          <div class="sb-section-title">
+            <div class="uptime-header-left">
+              <span class="uptime-dot-global" id="proxmoxDot"></span>
+              <span id="proxmoxTitle" data-i18n="proxmoxWidget"></span>
+              <span class="uptime-global-label" id="proxmoxLabel"></span>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <button class="sb-refresh" id="btnRefreshProxmox">↻</button>
+              <button class="sb-refresh" id="btnManageProxmox" style="font-size:11px">⚙</button>
+            </div>
+          </div>
+          <div id="proxmoxStats"></div>
+        </div>
+      </section>
+
+      <!-- Widget: Docker (Portainer) -->
+      <section class="widget" id="w-docker" data-widget="docker">
+        <div class="sidebar-uptime" id="dockerSection" style="display:none">
+          <div class="sb-section-title">
+            <div class="uptime-header-left">
+              <span class="uptime-dot-global" id="dockerDot"></span>
+              <span id="dockerTitle" data-i18n="dockerWidget"></span>
+              <span class="uptime-global-label" id="dockerLabel"></span>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <button class="sb-refresh" id="btnRefreshDocker">↻</button>
+              <button class="sb-refresh" id="btnManageDocker" style="font-size:11px">⚙</button>
+            </div>
+          </div>
+          <div id="dockerStats"></div>
+        </div>
+      </section>
+
     </div>
   </aside>
 
@@ -142,6 +178,24 @@
         </div>
       </section>
 
+      <!-- Widget: Pi-hole -->
+      <section class="widget" id="w-pihole" data-widget="pihole">
+        <div class="sidebar-uptime" id="piholeSection" style="display:none">
+          <div class="sb-section-title">
+            <div class="uptime-header-left">
+              <span class="uptime-dot-global" id="piholeDot"></span>
+              <span data-i18n="piholeWidget"></span>
+              <span class="uptime-global-label" id="piholeLabel"></span>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <button class="sb-refresh" id="btnRefreshPihole">↻</button>
+              <button class="sb-refresh" id="btnManagePihole" style="font-size:11px">⚙</button>
+            </div>
+          </div>
+          <div id="piholeStats"></div>
+        </div>
+      </section>
+
       <!-- Widget: Quick Note -->
       <section class="widget widget-grow" id="w-note" data-widget="note">
         <div class="note-wrap">
@@ -198,6 +252,18 @@
       <div class="modal-tab" data-tab="uptime" data-widget-tab="uptime">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 8.5L9 3.5 6 12H2"/></svg>
         <span data-i18n="uptime"></span>
+      </div>
+      <div class="modal-tab" data-tab="proxmox" data-widget-tab="proxmox">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="7" rx="1.5"/><rect x="3" y="13" width="18" height="7" rx="1.5"/><path d="M7 7.5h.01M7 16.5h.01"/></svg>
+        <span data-i18n="proxmoxWidget"></span>
+      </div>
+      <div class="modal-tab" data-tab="docker" data-widget-tab="docker">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11h4v3H4zM9 11h4v3H9zM14 11h4v3h-4zM9 7h4v3H9z"/><path d="M3 14c0 3.5 2.5 5 6 5 5 0 8-2.5 9-6 1.5.5 2.5-.5 2.5-1.5"/></svg>
+        <span data-i18n="dockerWidget"></span>
+      </div>
+      <div class="modal-tab" data-tab="pihole" data-widget-tab="pihole">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 000 18M8 8l8 8M16 8l-8 8"/></svg>
+        <span data-i18n="piholeWidget"></span>
       </div>
       <div class="modal-tab" data-tab="markets" data-widget-tab="markets">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 7l-7.5 7.5-4-4L2 19"/><path d="M16 7h6v6"/></svg>
@@ -435,11 +501,93 @@
             <input id="ukSlug" type="text" placeholder="default" />
           </div>
         </div>
+        <div class="field">
+          <label data-i18n="uptimeMode"></label>
+          <div class="widget-seg" id="uptimeModeSel" style="align-self:flex-start">
+            <button class="widget-seg-btn" data-mode="extended" data-i18n="uptimeExtended"></button>
+            <button class="widget-seg-btn" data-mode="compact" data-i18n="uptimeCompact"></button>
+          </div>
+        </div>
         <div class="btn-row">
           <button class="btn btn-primary btn-sm" id="btnSaveUptime" data-i18n="save"></button>
           <button class="btn btn-danger btn-sm" id="btnRemoveUptime" data-i18n="remove"></button>
         </div>
         <div id="uptimeTestResult" class="hint-text" style="margin-top:4px"></div>
+      </div>
+
+      <!-- TAB PROXMOX -->
+      <div class="modal-panel" id="tab-proxmox">
+        <p class="hint-text" data-i18n="proxmoxHint"></p>
+        <div class="field">
+          <label data-i18n="svcName"></label>
+          <input id="pmName" type="text" autocomplete="off" placeholder="Mi servidor" />
+        </div>
+        <div class="field">
+          <label data-i18n="svcUrl"></label>
+          <input id="pmUrl" type="url" autocomplete="off" placeholder="https://proxmox.miservidor.com:8006" />
+        </div>
+        <div class="field">
+          <label data-i18n="proxmoxTokenId"></label>
+          <input id="pmTokenId" type="text" autocomplete="off" placeholder="root@pam!dashboard" />
+        </div>
+        <div class="field">
+          <label data-i18n="proxmoxSecret"></label>
+          <input id="pmTokenSecret" type="password" autocomplete="off" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary btn-sm" id="btnSaveProxmox" data-i18n="save"></button>
+          <button class="btn btn-danger btn-sm" id="btnRemoveProxmox" data-i18n="remove"></button>
+        </div>
+        <div id="proxmoxTestResult" class="hint-text" style="margin-top:4px"></div>
+        <div class="svc-vm-select" id="proxmoxVmList" style="display:none"></div>
+        <div class="svc-setup" data-i18n-html="proxmoxSetup"></div>
+      </div>
+
+      <!-- TAB DOCKER / PORTAINER -->
+      <div class="modal-panel" id="tab-docker">
+        <p class="hint-text" data-i18n="dockerHint"></p>
+        <div class="field">
+          <label data-i18n="svcName"></label>
+          <input id="dkName" type="text" autocomplete="off" placeholder="Mi servidor" />
+        </div>
+        <div class="field-row">
+          <div class="field" style="flex:2">
+            <label data-i18n="svcUrl"></label>
+            <input id="dkUrl" type="url" autocomplete="off" placeholder="https://portainer.miservidor.com" />
+          </div>
+          <div class="field" style="flex:1">
+            <label data-i18n="dockerEndpoint"></label>
+            <input id="dkEndpoint" type="text" autocomplete="off" placeholder="auto" />
+          </div>
+        </div>
+        <div class="field">
+          <label data-i18n="dockerApiKey"></label>
+          <input id="dkApiKey" type="password" autocomplete="off" placeholder="ptr_xxxxxxxxxxxxxxxx" />
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary btn-sm" id="btnSaveDocker" data-i18n="save"></button>
+          <button class="btn btn-danger btn-sm" id="btnRemoveDocker" data-i18n="remove"></button>
+        </div>
+        <div id="dockerTestResult" class="hint-text" style="margin-top:4px"></div>
+        <div class="svc-setup" data-i18n-html="dockerSetup"></div>
+      </div>
+
+      <!-- TAB PI-HOLE -->
+      <div class="modal-panel" id="tab-pihole">
+        <p class="hint-text" data-i18n="piholeHint"></p>
+        <div class="field">
+          <label data-i18n="svcUrl"></label>
+          <input id="phUrl" type="url" autocomplete="off" placeholder="https://pihole.miservidor.com" />
+        </div>
+        <div class="field">
+          <label data-i18n="piholePassword"></label>
+          <input id="phPassword" type="password" autocomplete="off" placeholder="••••••••" />
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary btn-sm" id="btnSavePihole" data-i18n="save"></button>
+          <button class="btn btn-danger btn-sm" id="btnRemovePihole" data-i18n="remove"></button>
+        </div>
+        <div id="piholeTestResult" class="hint-text" style="margin-top:4px"></div>
       </div>
 
       <!-- TAB IDIOMA -->

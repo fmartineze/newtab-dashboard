@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "My Dashboard",
-  "version": "1.9.0",
+  "version": "1.10.0",
   "description": "A minimal, elegant new tab dashboard",
   "chrome_url_overrides": {
     "newtab": "dashboard.html"
