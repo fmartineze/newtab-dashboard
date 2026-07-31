@@ -38,7 +38,7 @@ The dashboard is split into three columns:
 - **No API keys** — Weather, crypto, and YouTube videos work without registration
 - **Firefox Sync** — Settings sync automatically across devices
 - **Automatic icons** — Links suggest their icon from Simple Icons as you type the name
-- **Customizable wallpaper** — Image URL or preset gradient, with opacity, blur, dim, and tint controls
+- **Backgrounds** — Image URL, **Bing** daily wallpaper, **Wallhaven** browser or preset gradients, with opacity, blur, dim, and tint controls
 - **Configurable widgets** — Enable, disable, move between bars and reorder the dashboard widgets (clock, feeds, weather, calendar, markets, notes, Uptime Kuma, Proxmox, Docker, Pi-hole)
 - **Homelab monitoring** — Proxmox VM status, Docker containers (via Portainer) and Pi-hole stats, with CPU and RAM usage. Credentials are only ever sent to your own servers
 - **Import / Export** — Save and restore your full configuration as a JSON file

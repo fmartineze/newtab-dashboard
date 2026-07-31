@@ -466,13 +466,46 @@
             <span id="wallPreviewText" data-i18n="wallHint"></span>
           </div>
         </div>
-        <div class="url-row">
-          <div class="field url-field"><label data-i18n="imageUrl"></label><input id="wallUrlInput" type="url" placeholder="https://images.unsplash.com/photo-…" /></div>
-          <button class="btn btn-primary btn-sm" id="btnApplyWallUrl" data-i18n="apply"></button>
+        <div class="widget-seg" id="wallTypeSel" style="margin:10px 0;align-self:flex-start">
+          <button class="widget-seg-btn" data-src="url" data-i18n="wallTypeUrl"></button>
+          <button class="widget-seg-btn" data-src="bing" data-i18n="wallTypeBing"></button>
+          <button class="widget-seg-btn" data-src="wallhaven" data-i18n="wallTypeWallhaven"></button>
+          <button class="widget-seg-btn" data-src="gradient" data-i18n="wallTypeGradient"></button>
         </div>
-        <p class="hint-text" data-i18n="wallUrlHint"></p>
-        <div>
-          <div class="add-form-title" style="margin-bottom:8px" data-i18n="presetGradients"></div>
+
+        <!-- Source panel: URL -->
+        <div class="wall-panel" id="wallPanelUrl">
+          <div class="url-row">
+            <div class="field url-field"><label data-i18n="imageUrl"></label><input id="wallUrlInput" type="url" placeholder="https://images.unsplash.com/photo-…" /></div>
+            <button class="btn btn-primary btn-sm" id="btnApplyWallUrl" data-i18n="apply"></button>
+          </div>
+          <p class="hint-text" data-i18n="wallUrlHint"></p>
+        </div>
+
+        <!-- Source panel: Bing Daily -->
+        <div class="wall-panel" id="wallPanelBing">
+          <button class="btn btn-primary btn-sm align-start" id="btnBingApply" data-i18n="bingApply"></button>
+          <p class="hint-text" style="margin-top:8px" data-i18n="bingHint"></p>
+          <p class="hint-text" id="bingCopyright" style="margin-top:2px"></p>
+        </div>
+
+        <!-- Source panel: Wallhaven -->
+        <div class="wall-panel" id="wallPanelWallhaven">
+          <div class="url-row">
+            <div class="field url-field"><input id="whSearch" type="text" data-i18n-placeholder="wallhavenSearchPh" placeholder="" autocomplete="off" /></div>
+            <button class="btn btn-primary btn-sm" id="btnWhSearch" data-i18n="search"></button>
+          </div>
+          <div class="wh-grid" id="whGrid"></div>
+          <div class="wh-pager">
+            <button class="btn btn-ghost btn-sm" id="whPrev">‹</button>
+            <span id="whPageInfo" class="hint-text"></span>
+            <button class="btn btn-ghost btn-sm" id="whNext">›</button>
+          </div>
+          <p class="hint-text" data-i18n="wallhavenHint"></p>
+        </div>
+
+        <!-- Source panel: Gradients -->
+        <div class="wall-panel" id="wallPanelGradient">
           <div class="wall-presets" id="wallPresets"></div>
         </div>
         <div class="wall-controls-grid">
@@ -643,6 +676,9 @@
         </div>
 
         <p class="hint-text" data-i18n="aboutLicenseHint"></p>
+        <div class="divider"></div>
+        <div class="appearance-section-title" data-i18n="aboutChangelog"></div>
+        <div id="aboutChangelog"></div>
         <div class="divider"></div>
         <p class="hint-text" data-i18n-html="aboutPrivacy"></p>
       </div>

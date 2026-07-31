@@ -89,7 +89,7 @@ const DEFAULT_FEEDS = [
   { id: uid(), name: 'Hacker News', url: 'https://hnrss.org/frontpage', count: 8 },
   { id: uid(), name: 'Lobste.rs',   url: 'https://lobste.rs/rss',       count: 8 },
 ];
-const DEFAULT_WALL = { opacity:100, dim:45, blur:0, tint:0, glass:18, src:null, type:'none', grad:null };
+const DEFAULT_WALL = { opacity:100, dim:45, blur:0, tint:0, glass:18, src:null, type:'none', grad:null, source:'url' };
 const FEED_PRESETS = [
   { name:'Hacker News',  url:'https://hnrss.org/frontpage' },
   { name:'Lobste.rs',    url:'https://lobste.rs/rss' },
@@ -293,6 +293,16 @@ const LANGUAGES = {
     wallHint:       'Introduce una URL de imagen abajo',
     imageUrl:       'URL de imagen',
     wallUrlHint:    'Unsplash, Picsum, cualquier URL pública directa · se sincroniza entre dispositivos',
+    wallType:       'Tipo de fondo',
+    wallTypeUrl:    'URL',
+    wallTypeBing:   'Bing',
+    wallTypeWallhaven: 'Wallhaven',
+    wallTypeGradient: 'Gradientes',
+    bingApply:      'Usar el wallpaper de Bing de hoy',
+    bingHint:       'Imagen diaria de Bing. Se actualiza sola cada día.',
+    wallhavenSearchPh: 'Buscar wallpapers…',
+    wallhavenHint:  'Wallhaven (solo SFW). Busca y haz clic en uno para aplicarlo.',
+    search:         'Buscar',
     presetGradients:'Gradientes predefinidos',
     opacity:        'Opacidad',
     darken:         'Oscurecer',
@@ -385,6 +395,7 @@ const LANGUAGES = {
     aboutDeveloper:   'Desarrollador',
     aboutContributors:'Colaboradores',
     aboutContributorsLink:'Ver colaboradores',
+    aboutChangelog:   'Novedades',
     aboutVersionLabel:'Versión',
     aboutLicense:     'Licencia',
     aboutLicenseHint: 'Publicado bajo licencia MIT: software libre y gratuito. Puedes usarlo, modificarlo y redistribuirlo sin restricciones, conservando el aviso de copyright.',
@@ -522,6 +533,16 @@ const LANGUAGES = {
     wallHint:       'Enter an image URL below',
     imageUrl:       'Image URL',
     wallUrlHint:    'Unsplash, Picsum, any public direct URL · syncs across devices',
+    wallType:       'Background type',
+    wallTypeUrl:    'URL',
+    wallTypeBing:   'Bing',
+    wallTypeWallhaven: 'Wallhaven',
+    wallTypeGradient: 'Gradients',
+    bingApply:      "Use today's Bing wallpaper",
+    bingHint:       'Bing daily image. Refreshes automatically every day.',
+    wallhavenSearchPh: 'Search wallpapers…',
+    wallhavenHint:  'Wallhaven (SFW only). Search and click one to apply it.',
+    search:         'Search',
     presetGradients:'Preset gradients',
     opacity:        'Opacity',
     darken:         'Darken',
@@ -614,6 +635,7 @@ const LANGUAGES = {
     aboutDeveloper:   'Developer',
     aboutContributors:'Contributors',
     aboutContributorsLink:'View contributors',
+    aboutChangelog:   "What's new",
     aboutVersionLabel:'Version',
     aboutLicense:     'License',
     aboutLicenseHint: 'Released under the MIT license: free and open source software. You may use, modify and redistribute it without restrictions, keeping the copyright notice.',
@@ -701,6 +723,12 @@ const LANGUAGES = {
     engineHint: 'Выберите поисковик по умолчанию. Прямые URL всегда открываются без поисковика.',
     wallHint: 'Введите URL изображения ниже', imageUrl: 'URL изображения',
     wallUrlHint: 'Unsplash, Picsum, любой публичный прямой URL · синхронизируется между устройствами',
+    wallType: 'Тип фона', wallTypeUrl: 'URL', wallTypeBing: 'Bing', wallTypeWallhaven: 'Wallhaven', wallTypeGradient: 'Градиенты',
+    bingApply: 'Обои Bing на сегодня',
+    bingHint: 'Ежедневное изображение Bing. Обновляется автоматически каждый день.',
+    wallhavenSearchPh: 'Поиск обоев…',
+    wallhavenHint: 'Wallhaven (только SFW). Найдите и нажмите на обои, чтобы применить.',
+    search: 'Поиск',
     presetGradients: 'Готовые градиенты', opacity: 'Прозрачность', darken: 'Затемнение', blur: 'Размытие',
     tint: 'Тон', glass: 'Стекло', removeBackground: 'Убрать фон',
     langHint: 'Выберите язык интерфейса.',
@@ -743,7 +771,7 @@ const LANGUAGES = {
     svcTimeout: 'Превышено время ожидания', svcOpenUrl: 'Открыть URL и принять сертификат',
     about: 'О программе', aboutTagline: 'Минималистичная новая вкладка для Firefox',
     aboutProject: 'Проект', aboutDeveloper: 'Разработчик', aboutVersionLabel: 'Версия',
-    aboutContributors: 'Соавторы', aboutContributorsLink: 'Посмотреть соавторов',
+    aboutContributors: 'Соавторы', aboutContributorsLink: 'Посмотреть соавторов', aboutChangelog: 'Что нового',
     aboutLicense: 'Лицензия',
     aboutLicenseHint: 'Опубликовано под лицензией MIT: свободное и открытое ПО. Вы можете использовать, изменять и распространять его без ограничений, сохраняя уведомление об авторских правах.',
     aboutPrivacy: 'Все ваши настройки хранятся <strong>в вашем браузере</strong> и синхронизируются через аккаунт Firefox. Расширение не собирает и не отправляет персональные данные и не требует API-ключей.',
@@ -1312,7 +1340,7 @@ function switchTab(tab) {
   if (tab==='videos')  renderVideoChannelModal();
   if (tab==='widgets') renderWidgetsModal();
   if (tab==='about')   renderAbout();
-  if (tab==='appearance') { renderThemeModal(); renderGradientPresets(); updateWallPreview(wallSettings.type==='image'?wallSettings.src:null); }
+  if (tab==='appearance') { renderThemeModal(); renderGradientPresets(); renderWallSource(); updateWallPreview(wallSettings.type==='gradient' ? wallSettings.grad : ((wallSettings.type==='image'||wallSettings.type==='bing') ? wallSettings.src : null)); }
 }
 
 // ── Section / Group / Link modal ──
@@ -1617,17 +1645,25 @@ function updateWallPreview(src) {
   const img=document.getElementById('wallPreviewImg');
   const txt=document.getElementById('wallPreviewText');
   const inp=document.getElementById('wallUrlInput');
-  if(src&&!src.startsWith('linear-gradient')) {
+  const wrap=img?img.closest('.wall-preview-wrap'):null;
+  if(wrap) wrap.style.backgroundImage=''; // clear any gradient preview
+  img.onload=null; img.onerror=null;      // drop stale handlers so clearing src can't fire onerror
+  if(src&&src.startsWith('linear-gradient')) {
+    // Gradients aren't images: paint them as the preview box background.
+    img.classList.remove('loaded'); img.removeAttribute('src');
+    if(wrap) wrap.style.backgroundImage=src;
+    if(txt)txt.textContent=t.wallPreview;
+  } else if(src) {
     img.onload=()=>img.classList.add('loaded');
     img.onerror=()=>{ img.classList.remove('loaded'); if(txt)txt.textContent=t.errorImageLoad; };
     img.src=src; if(inp&&inp.value!==src)inp.value=src;
     if(txt)txt.textContent=t.wallPreview;
   } else {
-    img.src=''; img.classList.remove('loaded');
+    img.classList.remove('loaded'); img.removeAttribute('src');
     if(inp)inp.value=''; if(txt)txt.textContent=t.wallEnterUrl;
   }
 }
-function removeWallpaper() { wallSettings={...DEFAULT_WALL}; applyWallSettings(wallSettings); saveWall(); updateWallPreview(null); renderGradientPresets(); }
+function removeWallpaper() { const src=wallSettings.source; wallSettings={...DEFAULT_WALL, source:src}; applyWallSettings(wallSettings); saveWall(); updateWallPreview(null); renderGradientPresets(); }
 function resetWallSettings() { const {src,type,grad}=wallSettings; wallSettings={...DEFAULT_WALL,src,type,grad}; applyWallSettings(wallSettings); saveWall(); }
 function renderGradientPresets() {
   const wrap=document.getElementById('wallPresets'); if(!wrap)return; wrap.innerHTML='';
@@ -1635,9 +1671,86 @@ function renderGradientPresets() {
   none.addEventListener('click',removeWallpaper); wrap.appendChild(none);
   GRADIENT_PRESETS.forEach(p => {
     const d=document.createElement('div'); d.className='wall-preset'+(wallSettings.grad===p.grad?' active':''); d.style.background=p.grad; d.title=p.label;
-    d.addEventListener('click',()=>{ wallSettings.src=null; wallSettings.type='gradient'; wallSettings.grad=p.grad; applyWallSettings(wallSettings); saveWall(); updateWallPreview(null); renderGradientPresets(); });
+    d.addEventListener('click',()=>{ wallSettings.src=null; wallSettings.type='gradient'; wallSettings.grad=p.grad; wallSettings.source='gradient'; applyWallSettings(wallSettings); saveWall(); updateWallPreview(p.grad); renderGradientPresets(); });
     wrap.appendChild(d);
   });
+}
+
+// ── Background source selector (URL · Bing · Wallhaven) ──
+function setWallSource(source) {
+  wallSettings.source = ['bing', 'wallhaven', 'gradient'].includes(source) ? source : 'url';
+  saveWall(); renderWallSource();
+}
+function renderWallSource() {
+  const src = wallSettings.source || 'url';
+  document.querySelectorAll('#wallTypeSel .widget-seg-btn').forEach(b => b.classList.toggle('active', b.dataset.src === src));
+  ['url', 'bing', 'wallhaven', 'gradient'].forEach(s => {
+    const p = document.getElementById('wallPanel' + s.charAt(0).toUpperCase() + s.slice(1));
+    if (p) p.classList.toggle('active', s === src);
+  });
+  if (src === 'wallhaven' && !document.querySelector('#whGrid .wh-thumb')) wallhavenSearch(whQuery, 1);
+}
+
+// Bing daily wallpaper via bing.biturl.top (returns the day's image URL).
+function bingMkt() { return currentLang === 'es' ? 'es-ES' : currentLang === 'ru' ? 'ru-RU' : 'en-US'; }
+async function fetchBingWallpaper(fromButton) {
+  const note = document.getElementById('bingCopyright');
+  if (fromButton && note) { note.textContent = t.loading; }
+  try {
+    const res = await fetch('https://bing.biturl.top/?resolution=1920&format=json&index=0&mkt=' + bingMkt(), { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    if (!data || !data.url) throw new Error('no url');
+    wallSettings.src = data.url; wallSettings.type = 'bing'; wallSettings.grad = null; wallSettings.source = 'bing';
+    applyWallSettings(wallSettings); saveWall(); updateWallPreview(data.url); renderGradientPresets();
+    if (note) note.textContent = data.copyright || '';
+  } catch (e) {
+    if (fromButton && note) note.textContent = t.errorImageLoad;
+  }
+}
+
+// Wallhaven browser (SFW, no API key).
+let whQuery = '', whPage = 1, whLastPage = 1;
+async function wallhavenSearch(query, page) {
+  whQuery = query || ''; whPage = page || 1;
+  const grid = document.getElementById('whGrid'); if (!grid) return;
+  grid.innerHTML = '<div class="feed-empty">' + t.loading + '</div>';
+  try {
+    const params = new URLSearchParams({ purity: '100', categories: '111', page: String(whPage),
+      sorting: whQuery ? 'relevance' : 'toplist', q: whQuery });
+    const res = await fetch('https://wallhaven.cc/api/v1/search?' + params.toString(), { signal: AbortSignal.timeout(9000) });
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    whLastPage = (data.meta && data.meta.last_page) || 1;
+    renderWallhavenGrid(data.data || []);
+  } catch (e) {
+    grid.innerHTML = '<div class="feed-empty">' + t.errorImageLoad + '</div>';
+  }
+}
+function renderWallhavenGrid(items) {
+  const grid = document.getElementById('whGrid'); if (!grid) return;
+  grid.innerHTML = '';
+  if (!items.length) { grid.innerHTML = '<div class="feed-empty">—</div>'; }
+  items.forEach(it => {
+    const thumb = it.thumbs && (it.thumbs.small || it.thumbs.original); const full = it.path;
+    if (!thumb || !full) return;
+    const cell = document.createElement('div'); cell.className = 'wh-thumb' + (wallSettings.src === full ? ' active' : '');
+    cell.dataset.full = full;
+    const img = document.createElement('img'); img.loading = 'lazy'; img.src = thumb; img.alt = '';
+    cell.title = it.resolution || '';
+    cell.appendChild(img);
+    cell.addEventListener('click', () => applyWallhaven(full));
+    grid.appendChild(cell);
+  });
+  const info = document.getElementById('whPageInfo'); if (info) info.textContent = whPage + ' / ' + whLastPage;
+  const prev = document.getElementById('whPrev'), next = document.getElementById('whNext');
+  if (prev) prev.disabled = whPage <= 1;
+  if (next) next.disabled = whPage >= whLastPage;
+}
+function applyWallhaven(url) {
+  wallSettings.src = url; wallSettings.type = 'image'; wallSettings.grad = null; wallSettings.source = 'wallhaven';
+  applyWallSettings(wallSettings); saveWall(); updateWallPreview(url); renderGradientPresets();
+  document.querySelectorAll('#whGrid .wh-thumb').forEach(c => c.classList.toggle('active', c.dataset.full === url));
 }
 
 
@@ -3026,7 +3139,7 @@ function updateEditIconPreview(url) {
 // ════════════════════════════════════════════════
 // Fallback only for when the page is opened outside the extension context
 // (e.g. dashboard.html served as a plain file). The real source of truth is manifest.json.
-const APP_VERSION_FALLBACK = '1.10.0';
+const APP_VERSION_FALLBACK = '1.11.0';
 
 function getAppVersion() {
   try {
@@ -3036,12 +3149,41 @@ function getAppVersion() {
   return APP_VERSION_FALLBACK;
 }
 
+// What's-new list shown in the About tab. Newest first; items translated per language.
+const CHANGELOG = [
+  { v: '1.11.0',
+    es: ['Selector de tipo de fondo: URL, Bing Daily, Wallhaven y gradientes', 'Fondo de Bing diario por defecto'],
+    en: ['Background type selector: URL, Bing Daily, Wallhaven and gradients', 'Bing daily wallpaper by default'],
+    ru: ['Выбор типа фона: URL, Bing Daily, Wallhaven и градиенты', 'Ежедневные обои Bing по умолчанию'] },
+  { v: '1.10.0',
+    es: ['Widgets de homelab: Proxmox, Docker (Portainer) y Pi-hole', 'Nombre de servidor y formato compacto en Uptime Kuma'],
+    en: ['Homelab widgets: Proxmox, Docker (Portainer) and Pi-hole', 'Server name and compact layout for Uptime Kuma'],
+    ru: ['Виджеты homelab: Proxmox, Docker (Portainer) и Pi-hole', 'Имя сервера и компактный вид Uptime Kuma'] },
+  { v: '1.9.0',
+    es: ['Gestor de widgets: activar, desactivar, mover entre barras y reordenar'],
+    en: ['Widget manager: enable, disable, move between bars and reorder'],
+    ru: ['Менеджер виджетов: включение, отключение, перемещение и порядок'] },
+];
+
 function renderAbout() {
   const v = getAppVersion();
   const badge = document.getElementById('aboutVersion');
   if (badge) badge.textContent = 'v' + v;
   const row = document.getElementById('aboutVersionRow');
   if (row) row.textContent = v;
+  const cl = document.getElementById('aboutChangelog');
+  if (cl) {
+    cl.innerHTML = '';
+    const lang = ['es', 'en', 'ru'].includes(currentLang) ? currentLang : 'en';
+    CHANGELOG.forEach(entry => {
+      const items = entry[lang] || entry.en || [];
+      if (!items.length) return;
+      const ver = document.createElement('div'); ver.className = 'changelog-ver'; ver.textContent = 'v' + entry.v;
+      const ul = document.createElement('ul'); ul.className = 'changelog-list';
+      items.forEach(it => { const li = document.createElement('li'); li.textContent = it; ul.appendChild(li); });
+      cl.appendChild(ver); cl.appendChild(ul);
+    });
+  }
 }
 
 // ════════════════════════════════════════════════
@@ -3138,6 +3280,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Wall tab
   document.getElementById('wallUrlInput').addEventListener('input', e=>onWallUrlInput(e.target.value));
   document.getElementById('btnApplyWallUrl').addEventListener('click', ()=>applyWallUrl());
+  document.getElementById('wallTypeSel').addEventListener('click', e=>{ const b=e.target.closest('.widget-seg-btn'); if(b) setWallSource(b.dataset.src); });
+  document.getElementById('btnBingApply').addEventListener('click', ()=>fetchBingWallpaper(true));
+  document.getElementById('btnWhSearch').addEventListener('click', ()=>wallhavenSearch(document.getElementById('whSearch').value.trim(), 1));
+  document.getElementById('whSearch').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); wallhavenSearch(e.target.value.trim(), 1); } });
+  document.getElementById('whPrev').addEventListener('click', ()=>{ if(whPage>1) wallhavenSearch(whQuery, whPage-1); });
+  document.getElementById('whNext').addEventListener('click', ()=>{ if(whPage<whLastPage) wallhavenSearch(whQuery, whPage+1); });
   document.getElementById('slOpacity').addEventListener('input', e=>onWallSlider('opacity',e.target.value));
   document.getElementById('slDim').addEventListener('input',     e=>onWallSlider('dim',    e.target.value));
   document.getElementById('slBlur').addEventListener('input',    e=>onWallSlider('blur',   e.target.value));
@@ -3166,9 +3314,16 @@ async function init() {
   }
   feeds       = await Store.get('gd_feeds',    DEFAULT_FEEDS);
   notepad.value = await Store.get('gd_note', '');
-  const wallMeta = await Store.get('gd_wall', DEFAULT_WALL);
+  // Fresh install (no saved gd_wall) defaults to the Bing daily wallpaper.
+  // DEFAULT_WALL stays 'none' so "Remove background"/"Restore" still clear it.
+  const wallMeta = await Store.get('gd_wall', { ...DEFAULT_WALL, type: 'bing', source: 'bing' });
   wallSettings = { ...DEFAULT_WALL, ...wallMeta };
+  // Migrate configs saved before the source selector existed: derive the active tab from type.
+  if (wallMeta.source === undefined) {
+    wallSettings.source = wallSettings.type === 'gradient' ? 'gradient' : wallSettings.type === 'bing' ? 'bing' : 'url';
+  }
   applyWallSettings(wallSettings);
+  if (wallSettings.type === 'bing') fetchBingWallpaper(false); // fetch/refresh today's Bing image (best-effort)
 
   markets  = await Store.get('gd_markets',  DEFAULT_MARKETS);
   const savedEngine = await Store.get('gd_engine', 'google');
