@@ -668,7 +668,10 @@ body.theme-arctic.no-wall #wallDim { background:#060e12; }
 }
 
 /* Compact mode: cap the monitor grid height and scroll for the rest */
+/* Compact mode: single-line rows (hide the history bars) + capped height with scroll */
 .uptime-grid.compact { max-height: 150px; overflow-y: auto; }
+.uptime-grid.compact .uptime-bars { display: none; }
+.uptime-grid.compact .uptime-row { padding-top: 4px; padding-bottom: 4px; }
 /* Monitor grid */
 .uptime-grid {
   display: flex; flex-direction: column; gap: 4px;

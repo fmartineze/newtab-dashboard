@@ -2643,7 +2643,7 @@ async function saveUptimeConfig() {
       result.textContent = '✓ ' + monitors + ' ' + t.monitorsFound;
       result.style.color = 'var(--green)';
     }
-    uptimeConfig = { url, slug };
+    uptimeConfig = { url, slug, mode: uptimeConfig.mode || 'extended' }; // keep the layout mode
     await Store.set('gd_uptime', uptimeConfig);
     // Configuring Uptime activates its widget automatically
     const uw = widgets.find(w => w.id==='uptime');
@@ -3139,7 +3139,7 @@ function updateEditIconPreview(url) {
 // ════════════════════════════════════════════════
 // Fallback only for when the page is opened outside the extension context
 // (e.g. dashboard.html served as a plain file). The real source of truth is manifest.json.
-const APP_VERSION_FALLBACK = '1.11.1';
+const APP_VERSION_FALLBACK = '1.11.2';
 
 function getAppVersion() {
   try {
