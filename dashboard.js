@@ -1288,7 +1288,7 @@ function renderWidgetsModal() {
     sw.className = 'widget-switch' + (w.active ? ' on' : '');
     sw.setAttribute('role', 'switch');
     sw.setAttribute('aria-checked', w.active ? 'true' : 'false');
-    sw.innerHTML = '<span class="widget-switch-knob"></span>';
+    const knob = document.createElement('span'); knob.className = 'widget-switch-knob'; sw.appendChild(knob);
     sw.addEventListener('click', () => toggleWidget(w.id));
 
     // Name
@@ -1714,7 +1714,7 @@ let whQuery = '', whPage = 1, whLastPage = 1;
 async function wallhavenSearch(query, page) {
   whQuery = query || ''; whPage = page || 1;
   const grid = document.getElementById('whGrid'); if (!grid) return;
-  grid.innerHTML = '<div class="feed-empty">' + t.loading + '</div>';
+  setMsg(grid, 'feed-empty', t.loading);
   try {
     const params = new URLSearchParams({ purity: '100', categories: '111', page: String(whPage),
       sorting: whQuery ? 'relevance' : 'toplist', q: whQuery });
@@ -1724,13 +1724,13 @@ async function wallhavenSearch(query, page) {
     whLastPage = (data.meta && data.meta.last_page) || 1;
     renderWallhavenGrid(data.data || []);
   } catch (e) {
-    grid.innerHTML = '<div class="feed-empty">' + t.errorImageLoad + '</div>';
+    setMsg(grid, 'feed-empty', t.errorImageLoad);
   }
 }
 function renderWallhavenGrid(items) {
   const grid = document.getElementById('whGrid'); if (!grid) return;
-  grid.innerHTML = '';
-  if (!items.length) { grid.innerHTML = '<div class="feed-empty">—</div>'; }
+  grid.textContent = '';
+  if (!items.length) { setMsg(grid, 'feed-empty', '—'); }
   items.forEach(it => {
     const thumb = it.thumbs && (it.thumbs.small || it.thumbs.original); const full = it.path;
     if (!thumb || !full) return;
@@ -3139,7 +3139,7 @@ function updateEditIconPreview(url) {
 // ════════════════════════════════════════════════
 // Fallback only for when the page is opened outside the extension context
 // (e.g. dashboard.html served as a plain file). The real source of truth is manifest.json.
-const APP_VERSION_FALLBACK = '1.11.0';
+const APP_VERSION_FALLBACK = '1.11.1';
 
 function getAppVersion() {
   try {
