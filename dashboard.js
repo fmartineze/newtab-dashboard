@@ -186,6 +186,7 @@ let widgets = DEFAULT_WIDGETS.map(w => ({ ...w }));
 // pending add state
 let pendingSection = null; // section id waiting for a new group
 let pendingGroup   = null; // {sectionId, groupId} waiting for a new link
+let renameTarget   = null; // {sectionId, groupId?} when the section/group dialog is renaming
 
 async function save() {
   showSyncBadge('syncing');
@@ -222,6 +223,17 @@ const LANGUAGES = {
   es: {
     // General
     settings:       'Configuración',
+    welcomeTitle: 'Te damos la bienvenida',
+    welcomeLead: 'NewTab Dashboard convierte tu nueva pestaña de Firefox en un panel minimalista con tus enlaces favoritos, noticias, vídeos, mercados y el estado de tus servicios.',
+    welcomeStep1Title: 'Abre la configuración',
+    welcomeStep1Text: 'Pulsa el engranaje de la esquina superior derecha (aparece al mover el ratón).',
+    welcomeStep2Title: 'Añade tus enlaces',
+    welcomeStep2Text: 'Crea secciones, grupos y enlaces. Arrastra para ordenarlos y haz clic en un nombre para editarlo.',
+    welcomeStep3Title: 'Personaliza tu página',
+    welcomeStep3Text: 'Activa los widgets que quieras y elige el tema, el fondo y el idioma.',
+    welcomePrivacy: 'Todo se guarda en tu navegador y se sincroniza con tu cuenta de Firefox. No se envía ningún dato personal.',
+    welcomeStart: 'Empezar',
+    welcomeOpenSettings: 'Abrir configuración',
     close:          'Cerrar',
     cancel:         'Cancelar',
     add:            'Añadir',
@@ -264,7 +276,7 @@ const LANGUAGES = {
     background:     'Fondo',
     language:       'Idioma',
     // Tab Links
-    linksHint:      'Los grupos se organizan en <strong>secciones</strong>. Cada sección es una fila de columnas en el dashboard.',
+    linksHint:      'Los grupos se organizan en <strong>secciones</strong>. Cada sección es una fila de columnas en el dashboard. Arrastra para reordenar y haz clic en un nombre para editarlo.',
     newSection:     'Nueva sección',
     sectionName:    'Nombre de sección',
     sectionPlaceholder: 'Trabajo, Dev, Casa…',
@@ -275,6 +287,26 @@ const LANGUAGES = {
     createGroup:    'Crear grupo',
     addLinkTo:      'Añadir link en:',
     addLink:        'Añadir link',
+    linkOpenLabel:  'Abrir en', linkOpenNew: 'Pestaña nueva', linkOpenSame: 'Pestaña actual', editSection: 'Editar sección', dragToReorder: 'Arrastra para reordenar', dropHere: 'Soltar aquí', dropLinksHere: 'Arrastra un link aquí', dropGroupsHere: 'Arrastra un grupo aquí', slotNewSection: 'Nueva sección', slotNewGroup: 'Nuevo grupo', slotNewLink: 'Nuevo link', slotNewFeed: 'Nuevo feed', slotNewAsset: 'Nuevo activo', editFeed: 'Editar feed', editAsset: 'Editar activo', dropWidgetsHere: 'Arrastra un widget aquí', slotNewChannel: 'Nuevo canal', editChannel: 'Editar canal', videosWord: 'vídeos', channelDefaultName: 'Canal', clickToEdit: 'Haz clic para editar', editGroup: 'Editar grupo', linkOpenWindow: 'Ventana nueva',
+    general: 'General',
+    appearanceTab: 'Tema y texto',
+    grpContent: 'Mi página',
+    grpPersonalize: 'Personalizar',
+    grpWidgetSettings: 'Ajustes de widgets',
+    grpHelp: 'Ayuda',
+    desc_links: 'Organiza tus enlaces favoritos en secciones y grupos.',
+    desc_videos: 'Añade canales de YouTube para ver sus últimos vídeos.',
+    desc_widgets: 'Elige qué paneles ver en tu página, en qué lado y en qué orden.',
+    desc_appearance: 'Cambia los colores y el tamaño del texto.',
+    desc_background: 'Elige una imagen o un degradado de fondo y ajusta su aspecto.',
+    desc_general: 'Elige tu buscador por defecto y el idioma de la interfaz.',
+    desc_feeds: 'Añade las webs de noticias (RSS) que quieres leer.',
+    desc_uptime: 'Conecta tu Uptime Kuma para ver el estado de tus servicios.',
+    desc_proxmox: 'Conecta tu servidor Proxmox para ver su estado.',
+    desc_docker: 'Conecta Portainer para ver tus contenedores Docker.',
+    desc_pihole: 'Conecta Pi-hole para ver las estadísticas de bloqueo.',
+    desc_markets: 'Elige las criptomonedas que quieres seguir.',
+    desc_about: 'Versión de la extensión, novedades y enlaces.',
     iconLabel:      'Icono — URL personalizada <span style="color:var(--text-dim);font-weight:300">(opcional, se sugiere automáticamente)</span>',
     // Tab Feeds
     addFeed:        'Añadir feed',
@@ -349,7 +381,7 @@ const LANGUAGES = {
     uptimeLoading:  'Conectando…',
     // Tab Widgets
     widgets:          'Widgets',
-    widgetsHint:      'Activa o desactiva cada widget, elige en qué barra aparece (izquierda o derecha) y su orden. Solo los widgets activos se muestran en el dashboard.',
+    widgetsHint:      'Arrastra cada widget a la columna Izquierda o Derecha y ordénalos como quieras. Usa el interruptor para activarlo o desactivarlo; solo los widgets activos se muestran en el dashboard.',
     clockWidget:      'Reloj',
     colLeft:          'Izquierda',
     colRight:         'Derecha',
@@ -462,6 +494,17 @@ const LANGUAGES = {
   en: {
     // General
     settings:       'Settings',
+    welcomeTitle: 'Welcome',
+    welcomeLead: 'NewTab Dashboard turns your Firefox new tab into a minimal panel with your favorite links, news, videos, markets and the status of your services.',
+    welcomeStep1Title: 'Open the settings',
+    welcomeStep1Text: 'Click the gear in the top-right corner (it shows up when you move the mouse).',
+    welcomeStep2Title: 'Add your links',
+    welcomeStep2Text: 'Create sections, groups and links. Drag to reorder them and click a name to edit it.',
+    welcomeStep3Title: 'Make it yours',
+    welcomeStep3Text: 'Turn on the widgets you want and pick the theme, background and language.',
+    welcomePrivacy: 'Everything is stored in your browser and synced through your Firefox account. No personal data is sent anywhere.',
+    welcomeStart: 'Get started',
+    welcomeOpenSettings: 'Open settings',
     close:          'Close',
     cancel:         'Cancel',
     add:            'Add',
@@ -504,7 +547,7 @@ const LANGUAGES = {
     background:     'Background',
     language:       'Language',
     // Tab Links
-    linksHint:      'Groups are organized into <strong>sections</strong>. Each section is a row of columns in the dashboard.',
+    linksHint:      'Groups are organized into <strong>sections</strong>. Each section is a row of columns in the dashboard. Drag to reorder and click a name to edit it.',
     newSection:     'New section',
     sectionName:    'Section name',
     sectionPlaceholder: 'Work, Dev, Home…',
@@ -515,6 +558,26 @@ const LANGUAGES = {
     createGroup:    'Create group',
     addLinkTo:      'Add link to:',
     addLink:        'Add link',
+    linkOpenLabel:  'Open in', linkOpenNew: 'New tab', linkOpenSame: 'Current tab', editSection: 'Edit section', dragToReorder: 'Drag to reorder', dropHere: 'Drop here', dropLinksHere: 'Drag a link here', dropGroupsHere: 'Drag a group here', slotNewSection: 'New section', slotNewGroup: 'New group', slotNewLink: 'New link', slotNewFeed: 'New feed', slotNewAsset: 'New asset', editFeed: 'Edit feed', editAsset: 'Edit asset', dropWidgetsHere: 'Drag a widget here', slotNewChannel: 'New channel', editChannel: 'Edit channel', videosWord: 'videos', channelDefaultName: 'Channel', clickToEdit: 'Click to edit', editGroup: 'Edit group', linkOpenWindow: 'New window',
+    general: 'General',
+    appearanceTab: 'Theme & text',
+    grpContent: 'My page',
+    grpPersonalize: 'Customize',
+    grpWidgetSettings: 'Widget settings',
+    grpHelp: 'Help',
+    desc_links: 'Organize your favorite links into sections and groups.',
+    desc_videos: 'Add YouTube channels to see their latest videos.',
+    desc_widgets: 'Choose which panels to show, on which side and in what order.',
+    desc_appearance: 'Change the colors and the text size.',
+    desc_background: 'Pick a background image or gradient and adjust how it looks.',
+    desc_general: 'Choose your default search engine and the interface language.',
+    desc_feeds: 'Add the news sites (RSS) you want to read.',
+    desc_uptime: 'Connect your Uptime Kuma to see the status of your services.',
+    desc_proxmox: 'Connect your Proxmox server to see its status.',
+    desc_docker: 'Connect Portainer to see your Docker containers.',
+    desc_pihole: 'Connect Pi-hole to see blocking statistics.',
+    desc_markets: 'Choose the cryptocurrencies you want to follow.',
+    desc_about: 'Extension version, what\'s new and links.',
     iconLabel:      'Icon — custom URL <span style="color:var(--text-dim);font-weight:300">(optional, suggested automatically)</span>',
     // Tab Feeds
     addFeed:        'Add feed',
@@ -589,7 +652,7 @@ const LANGUAGES = {
     uptimeLoading:  'Connecting…',
     // Tab Widgets
     widgets:          'Widgets',
-    widgetsHint:      'Enable or disable each widget, choose which bar it appears in (left or right) and its order. Only active widgets are shown on the dashboard.',
+    widgetsHint:      'Drag each widget to the Left or Right column and order them as you like. Use the switch to turn it on or off; only active widgets are shown on the dashboard.',
     clockWidget:      'Clock',
     colLeft:          'Left',
     colRight:         'Right',
@@ -700,6 +763,17 @@ const LANGUAGES = {
   },
   ru: {
     settings: 'Настройки', close: 'Закрыть', cancel: 'Отмена', add: 'Добавить', apply: 'Применить', restore: 'Сбросить',
+    welcomeTitle: 'Добро пожаловать',
+    welcomeLead: 'NewTab Dashboard превращает новую вкладку Firefox в минималистичную панель с любимыми ссылками, новостями, видео, рынками и состоянием ваших сервисов.',
+    welcomeStep1Title: 'Откройте настройки',
+    welcomeStep1Text: 'Нажмите на шестерёнку в правом верхнем углу (она появляется при движении мыши).',
+    welcomeStep2Title: 'Добавьте ссылки',
+    welcomeStep2Text: 'Создавайте разделы, группы и ссылки. Перетаскивайте для изменения порядка и нажимайте на название, чтобы изменить его.',
+    welcomeStep3Title: 'Настройте под себя',
+    welcomeStep3Text: 'Включите нужные виджеты и выберите тему, фон и язык.',
+    welcomePrivacy: 'Всё хранится в вашем браузере и синхронизируется через аккаунт Firefox. Личные данные никуда не отправляются.',
+    welcomeStart: 'Начать',
+    welcomeOpenSettings: 'Открыть настройки',
     refresh: 'Обновить', manage: 'Управлять', name: 'Название', items: 'Элементы', popular: 'Популярные…',
     clickToSelect: 'Нажмите, чтобы выбрать', clickToAdd: 'Нажмите, чтобы добавить', loading: 'Загрузка...',
     symbol: 'Символ', displayName: 'Отображаемое имя', export: 'Экспорт', import: 'Импорт',
@@ -709,10 +783,30 @@ const LANGUAGES = {
     markets: 'Рынки', quickNote: 'Быстрая заметка', writeSomething: 'Напишите что-нибудь...',
     searchPlaceholder: 'Поиск или переход по URL...', links: 'Ссылки', videos: 'Видео',
     searchEngine: 'Поисковик', background: 'Фон', language: 'Язык',
-    linksHint: 'Группы организованы в <strong>разделы</strong>. Каждый раздел — это ряд колонок на дашборде.',
+    linksHint: 'Группы организованы в <strong>разделы</strong>. Каждый раздел — это ряд колонок на дашборде. Перетаскивайте для изменения порядка и нажмите на название, чтобы изменить его.',
     newSection: 'Новый раздел', sectionName: 'Название раздела', sectionPlaceholder: 'Работа, Dev, Дом…',
     createSection: 'Создать раздел', newGroupIn: 'Новая группа в:', groupName: 'Название группы',
     groupPlaceholder: 'Gmail, GitHub, Proxmox…', createGroup: 'Создать группу', addLinkTo: 'Добавить ссылку в:',
+    linkOpenLabel: 'Открывать в', linkOpenNew: 'Новой вкладке', linkOpenSame: 'Текущей вкладке', editSection: 'Изменить раздел', dragToReorder: 'Перетащите, чтобы изменить порядок', dropHere: 'Отпустите здесь', dropLinksHere: 'Перетащите ссылку сюда', dropGroupsHere: 'Перетащите группу сюда', slotNewSection: 'Новый раздел', slotNewGroup: 'Новая группа', slotNewLink: 'Новая ссылка', slotNewFeed: 'Новая лента', slotNewAsset: 'Новый актив', editFeed: 'Изменить ленту', editAsset: 'Изменить актив', dropWidgetsHere: 'Перетащите виджет сюда', slotNewChannel: 'Новый канал', editChannel: 'Изменить канал', videosWord: 'видео', channelDefaultName: 'Канал', clickToEdit: 'Нажмите, чтобы изменить', editGroup: 'Изменить группу', linkOpenWindow: 'Новом окне',
+    general: 'Общие',
+    appearanceTab: 'Тема и текст',
+    grpContent: 'Моя страница',
+    grpPersonalize: 'Персонализация',
+    grpWidgetSettings: 'Настройки виджетов',
+    grpHelp: 'Справка',
+    desc_links: 'Организуйте любимые ссылки по разделам и группам.',
+    desc_videos: 'Добавьте каналы YouTube, чтобы видеть их новые видео.',
+    desc_widgets: 'Выберите, какие панели показывать, с какой стороны и в каком порядке.',
+    desc_appearance: 'Измените цвета и размер текста.',
+    desc_background: 'Выберите фоновое изображение или градиент и настройте его вид.',
+    desc_general: 'Выберите поисковик по умолчанию и язык интерфейса.',
+    desc_feeds: 'Добавьте новостные сайты (RSS), которые хотите читать.',
+    desc_uptime: 'Подключите Uptime Kuma, чтобы видеть состояние сервисов.',
+    desc_proxmox: 'Подключите сервер Proxmox, чтобы видеть его состояние.',
+    desc_docker: 'Подключите Portainer, чтобы видеть контейнеры Docker.',
+    desc_pihole: 'Подключите Pi-hole, чтобы видеть статистику блокировки.',
+    desc_markets: 'Выберите криптовалюты, за которыми хотите следить.',
+    desc_about: 'Версия расширения, новости и ссылки.',
     addLink: 'Добавить ссылку', iconLabel: 'Иконка — свой URL <span style="color:var(--text-dim);font-weight:300">(необязательно, подставляется автоматически)</span>',
     addFeed: 'Добавить ленту',
     marketsHint: 'Цены в реальном времени через CoinGecko (бесплатно, без API key). Введите <strong>ID CoinGecko</strong> каждого актива (например: <em>bitcoin</em>, <em>ethereum</em>, <em>solana</em>).',
@@ -748,7 +842,7 @@ const LANGUAGES = {
     uptimeAllUp: 'Все работают', uptimePartial: 'Частичные сбои', uptimeDown: 'Активный инцидент',
     uptimeError: 'Ошибка подключения', uptimeLoading: 'Подключение…',
     widgets: 'Виджеты',
-    widgetsHint: 'Включайте или отключайте виджеты, выбирайте, в какой панели они отображаются (слева или справа) и их порядок. На дашборде показываются только активные виджеты.',
+    widgetsHint: 'Перетаскивайте виджеты в левую или правую колонку и располагайте их как нужно. Переключатель включает и отключает виджет; на дашборде показываются только активные.',
     clockWidget: 'Часы', colLeft: 'Слева', colRight: 'Справа',
     proxmoxWidget: 'Proxmox', dockerWidget: 'Docker', piholeWidget: 'Pi-hole',
     proxmoxHint: 'Состояние ВМ и LXC-контейнеров кластера Proxmox VE через API-токен (только чтение). Требуется HTTPS, доступный из браузера.',
@@ -798,7 +892,531 @@ const LANGUAGES = {
     videosTip: '💡 Совет: если у канала URL с <em>@пользователь</em>, Channel ID можно найти на <a href="https://www.youtube.com/@пользователь/about" target="_blank" style="color:var(--accent-warm)">странице About</a> → Поделиться → Скопировать ID канала.',
     groups: 'групп', linksWord: 'ссылок', addGroupBtn: '+ Группа', addLinkBtn: '+ Ссылка',
     noBackground: 'Без фона', monitorsFound: 'мониторов найдено', weekShort: 'нед',
-  }
+  },
+  fr: {
+    settings: 'Paramètres',
+    welcomeTitle: 'Bienvenue',
+    welcomeLead: 'NewTab Dashboard transforme votre nouvel onglet Firefox en un tableau de bord minimaliste avec vos liens favoris, actualités, vidéos, marchés et l\'état de vos services.',
+    welcomeStep1Title: 'Ouvrez les paramètres',
+    welcomeStep1Text: 'Cliquez sur l\'engrenage en haut à droite (il apparaît quand vous bougez la souris).',
+    welcomeStep2Title: 'Ajoutez vos liens',
+    welcomeStep2Text: 'Créez des sections, des groupes et des liens. Faites glisser pour les réorganiser et cliquez sur un nom pour le modifier.',
+    welcomeStep3Title: 'Personnalisez votre page',
+    welcomeStep3Text: 'Activez les widgets que vous voulez et choisissez le thème, l\'arrière-plan et la langue.',
+    welcomePrivacy: 'Tout est enregistré dans votre navigateur et synchronisé via votre compte Firefox. Aucune donnée personnelle n\'est envoyée.',
+    welcomeStart: 'Commencer',
+    welcomeOpenSettings: 'Ouvrir les paramètres',
+    close: 'Fermer',
+    cancel: 'Annuler',
+    add: 'Ajouter',
+    apply: 'Appliquer',
+    restore: 'Rétablir',
+    refresh: 'Actualiser',
+    manage: 'Gérer',
+    name: 'Nom',
+    items: 'Éléments',
+    popular: 'Populaires…',
+    clickToSelect: 'Cliquez pour sélectionner',
+    clickToAdd: 'Cliquez pour ajouter',
+    loading: 'Chargement...',
+    symbol: 'Symbole',
+    displayName: 'Nom affiché',
+    export: 'Exporter',
+    import: 'Importer',
+    news: 'Actualités',
+    feedEmpty: 'Ajoutez un flux RSS depuis Liens.',
+    goodMorning: 'Bonjour',
+    goodAfternoon: 'Bon après-midi',
+    goodEvening: 'Bonsoir',
+    weather: 'Météo',
+    wind: 'Vent',
+    humidity: 'Humidité',
+    feelsLike: 'Ressenti',
+    calendar: 'Calendrier',
+    markets: 'Marchés',
+    quickNote: 'Note rapide',
+    writeSomething: 'Écrivez quelque chose...',
+    searchPlaceholder: 'Rechercher ou saisir une URL...',
+    links: 'Liens',
+    videos: 'Vidéos',
+    searchEngine: 'Moteur de recherche',
+    background: 'Arrière-plan',
+    language: 'Langue',
+    linksHint: 'Les groupes sont organisés en <strong>sections</strong>. Chaque section est une ligne de colonnes dans le tableau de bord. Faites glisser pour réorganiser et cliquez sur un nom pour le modifier.',
+    newSection: 'Nouvelle section',
+    sectionName: 'Nom de la section',
+    sectionPlaceholder: 'Travail, Dev, Maison…',
+    createSection: 'Créer la section',
+    newGroupIn: 'Nouveau groupe dans :',
+    groupName: 'Nom du groupe',
+    groupPlaceholder: 'Gmail, GitHub, Proxmox…',
+    createGroup: 'Créer le groupe',
+    addLinkTo: 'Ajouter un lien à :',
+    addLink: 'Ajouter un lien',
+    linkOpenLabel: 'Ouvrir dans',
+    linkOpenNew: 'Nouvel onglet',
+    linkOpenSame: 'Onglet actuel',
+    editSection: 'Modifier la section',
+    dragToReorder: 'Faites glisser pour réorganiser',
+    dropHere: 'Déposer ici',
+    dropLinksHere: 'Faites glisser un lien ici',
+    dropGroupsHere: 'Faites glisser un groupe ici',
+    slotNewSection: 'Nouvelle section',
+    slotNewGroup: 'Nouveau groupe',
+    slotNewLink: 'Nouveau lien',
+    slotNewFeed: 'Nouveau flux',
+    slotNewAsset: 'Nouvel actif',
+    editFeed: 'Modifier le flux',
+    editAsset: 'Modifier l\'actif',
+    dropWidgetsHere: 'Faites glisser un widget ici',
+    slotNewChannel: 'Nouvelle chaîne',
+    editChannel: 'Modifier la chaîne',
+    videosWord: 'vidéos',
+    channelDefaultName: 'Chaîne',
+    clickToEdit: 'Cliquez pour modifier',
+    editGroup: 'Modifier le groupe',
+    linkOpenWindow: 'Nouvelle fenêtre',
+    general: 'Général',
+    appearanceTab: 'Thème et texte',
+    grpContent: 'Ma page',
+    grpPersonalize: 'Personnaliser',
+    grpWidgetSettings: 'Réglages des widgets',
+    grpHelp: 'Aide',
+    desc_links: 'Organisez vos liens favoris en sections et en groupes.',
+    desc_videos: 'Ajoutez des chaînes YouTube pour voir leurs dernières vidéos.',
+    desc_widgets: 'Choisissez les panneaux à afficher, de quel côté et dans quel ordre.',
+    desc_appearance: 'Changez les couleurs et la taille du texte.',
+    desc_background: 'Choisissez une image ou un dégradé d\'arrière-plan et ajustez son apparence.',
+    desc_general: 'Choisissez votre moteur de recherche par défaut et la langue de l\'interface.',
+    desc_feeds: 'Ajoutez les sites d\'actualités (RSS) que vous voulez lire.',
+    desc_uptime: 'Connectez votre Uptime Kuma pour voir l\'état de vos services.',
+    desc_proxmox: 'Connectez votre serveur Proxmox pour voir son état.',
+    desc_docker: 'Connectez Portainer pour voir vos conteneurs Docker.',
+    desc_pihole: 'Connectez Pi-hole pour voir les statistiques de blocage.',
+    desc_markets: 'Choisissez les cryptomonnaies que vous voulez suivre.',
+    desc_about: 'Version de l\'extension, nouveautés et liens.',
+    iconLabel: 'Icône — URL personnalisée <span style="color:var(--text-dim);font-weight:300">(facultatif, suggérée automatiquement)</span>',
+    addFeed: 'Ajouter un flux',
+    marketsHint: 'Prix en temps réel via CoinGecko (gratuit, sans clé API). Saisissez l\'<strong>ID CoinGecko</strong> de chaque actif (p. ex. <em>bitcoin</em>, <em>ethereum</em>, <em>solana</em>).',
+    addAsset: 'Ajouter un actif',
+    videosHint: 'Ajoutez des chaînes YouTube grâce à leur <strong>ID de chaîne</strong> ou leur <strong>@pseudo</strong>.',
+    videosHintHandle: '💡 Vous pouvez utiliser directement le @pseudo : <em>@naseros</em>, <em>@SoyITPro</em>… L\'ID est résolu automatiquement.',
+    addChannel: 'Ajouter une chaîne',
+    videosToShow: 'Vidéos à afficher',
+    manageChannels: 'Gérer les chaînes',
+    engineHint: 'Sélectionnez le moteur de recherche par défaut. Les URL directes s\'ouvrent toujours sans moteur de recherche.',
+    wallHint: 'Saisissez une URL d\'image ci-dessous',
+    imageUrl: 'URL de l\'image',
+    wallUrlHint: 'Unsplash, Picsum, toute URL directe publique · synchronisé entre vos appareils',
+    wallType: 'Type d\'arrière-plan',
+    wallTypeUrl: 'URL',
+    wallTypeBing: 'Bing',
+    wallTypeWallhaven: 'Wallhaven',
+    wallTypeGradient: 'Dégradés',
+    bingApply: 'Utiliser le fond d\'écran Bing du jour',
+    bingHint: 'Image du jour de Bing. Se renouvelle automatiquement chaque jour.',
+    wallhavenSearchPh: 'Rechercher des fonds d\'écran…',
+    wallhavenHint: 'Wallhaven (SFW uniquement). Recherchez, puis cliquez sur une image pour l\'appliquer.',
+    search: 'Rechercher',
+    presetGradients: 'Dégradés prédéfinis',
+    opacity: 'Opacité',
+    darken: 'Assombrir',
+    blur: 'Flou',
+    tint: 'Teinte',
+    glass: 'Verre',
+    removeBackground: 'Supprimer l\'arrière-plan',
+    langHint: 'Sélectionnez la langue de l\'interface.',
+    synced: '↑ synchronisé',
+    syncing: '↑ synchronisation…',
+    syncError: '⚠ erreur de synchronisation',
+    videosLabel: 'VIDÉOS',
+    days: ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'],
+    months: ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'],
+    monthsGen: ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'],
+    monthsShort: ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'],
+    dow: ['Lu','Ma','Me','Je','Ve','Sa','Di'],
+    weatherCodes: {0:'Ciel dégagé',1:'Plutôt dégagé',2:'Partiellement nuageux',3:'Couvert',45:'Brouillard',48:'Brouillard',51:'Bruine',61:'Pluie',63:'Pluie',65:'Pluie',71:'Neige',80:'Averses',81:'Averses',95:'Orage'},
+    appearance: 'Apparence',
+    theme: 'Thème',
+    themeHint: 'Personnalisez la palette de couleurs de l\'interface.',
+    fontSize: 'Taille du texte',
+    editLink: 'Modifier le lien',
+    alertAddLink: 'Veuillez renseigner le nom et l\'URL.',
+    uptime: 'Uptime',
+    uptimeHint: 'Connectez-vous à votre instance Uptime Kuma via une page d\'état publique. Aucun identifiant requis.',
+    uptimeUrl: 'URL d\'Uptime Kuma',
+    uptimeMode: 'Affichage',
+    uptimeExtended: 'Étendu',
+    uptimeCompact: 'Compact',
+    save: 'Enregistrer',
+    remove: 'Supprimer',
+    uptimeAllUp: 'Tout est opérationnel',
+    uptimePartial: 'Dégradé',
+    uptimeDown: 'Incident en cours',
+    uptimeError: 'Erreur de connexion',
+    uptimeLoading: 'Connexion…',
+    widgets: 'Widgets',
+    widgetsHint: 'Faites glisser chaque widget vers la colonne Gauche ou Droite et ordonnez-les comme vous voulez. Utilisez l\'interrupteur pour l\'activer ou le désactiver ; seuls les widgets actifs s\'affichent sur le tableau de bord.',
+    clockWidget: 'Horloge',
+    colLeft: 'Gauche',
+    colRight: 'Droite',
+    proxmoxWidget: 'Proxmox',
+    dockerWidget: 'Docker',
+    piholeWidget: 'Pi-hole',
+    proxmoxHint: 'État des VM et des conteneurs LXC de votre cluster Proxmox VE via un jeton d\'API (lecture seule). Nécessite un accès HTTPS depuis le navigateur.',
+    proxmoxSetup: '<strong>Comment générer le jeton</strong><ol class="svc-steps"><li>Dans Proxmox : <em>Datacenter → Permissions → API Tokens → Add</em>.</li><li>Choisissez l\'utilisateur (p. ex. <em>root@pam</em>) et un nom de jeton. <strong>Décochez « Privilege Separation »</strong> et copiez le secret (affiché une seule fois).</li><li>L\'<strong>ID du jeton</strong> est <em>utilisateur@realm!nom</em> (p. ex. <em>root@pam!dashboard</em>) ; le <strong>Secret</strong> est l\'UUID affiché.</li><li>Si vous voyez <em>0/0</em>, le jeton n\'a aucune permission : dans <em>Permissions → Add → API Token Permission</em>, chemin <em>/</em>, rôle <strong>PVEAuditor</strong>.</li></ol>',
+    dockerHint: 'État de vos conteneurs Docker via l\'API de Portainer, avec une clé d\'API.',
+    dockerSetup: '<strong>Comment obtenir la clé d\'API</strong><ol class="svc-steps"><li>Dans Portainer, en haut à droite : <em>votre utilisateur → My account → Access tokens → Add access token</em>.</li><li>Copiez le jeton généré (il commence par <em>ptr_</em>). <strong>C\'est</strong> la clé d\'API — pas une URL.</li><li><strong>ID du endpoint</strong> : le numéro de l\'environnement dans Portainer (généralement <em>1</em>). <strong>Laissez vide pour le détecter automatiquement.</strong></li></ol>',
+    piholeHint: 'Statistiques de Pi-hole v6 (requêtes et blocage). Saisissez le mot de passe d\'application de votre Pi-hole.',
+    proxmoxTokenId: 'ID du jeton (utilisateur@realm!nom)',
+    proxmoxSecret: 'Secret du jeton',
+    dockerApiKey: 'Clé d\'API',
+    dockerEndpoint: 'ID du endpoint',
+    piholePassword: 'Mot de passe d\'application',
+    proxmoxVms: 'VM/CT trouvés',
+    dockerContainers: 'conteneurs',
+    dockerRunning: 'Conteneurs',
+    dockerStopped: 'Arrêtés',
+    dockerImages: 'Images',
+    proxmoxVmsLabel: 'VM',
+    proxmoxMonitor: 'Surveiller des VM (facultatif)',
+    proxmoxSelectHint: 'Choisissez les VM à afficher en détail sous les statistiques.',
+    piholeQueries: 'Requêtes',
+    piholeBlocked: 'Bloquées',
+    piholeDomains: 'Domaines',
+    piholeBlockPct: 'Bloquées',
+    svcUrl: 'URL du serveur',
+    svcName: 'Nom (facultatif)',
+    svcFillFields: 'Renseignez l\'URL et les identifiants.',
+    svcConnError: 'Connexion impossible (certificat ou URL ?)',
+    svcHttpError: 'Erreur du serveur',
+    svcAuthError: 'Identifiants invalides',
+    svcTimeout: 'Délai de la requête dépassé',
+    svcOpenUrl: 'Ouvrir l\'URL et accepter le certificat',
+    about: 'À propos',
+    aboutTagline: 'Un nouvel onglet minimaliste pour Firefox',
+    aboutProject: 'Projet',
+    aboutDeveloper: 'Développeur',
+    aboutContributors: 'Contributeurs',
+    aboutContributorsLink: 'Voir les contributeurs',
+    aboutChangelog: 'Nouveautés',
+    aboutVersionLabel: 'Version',
+    aboutLicense: 'Licence',
+    aboutLicenseHint: 'Publié sous licence MIT : logiciel libre et open source. Vous pouvez l\'utiliser, le modifier et le redistribuer sans restriction, en conservant la mention de copyright.',
+    aboutPrivacy: 'Tous vos réglages sont stockés <strong>dans votre propre navigateur</strong> et synchronisés via votre compte Firefox. L\'extension ne collecte ni n\'envoie aucune donnée personnelle et ne nécessite aucune clé d\'API.',
+    noItems: 'Aucun élément.',
+    noSections: 'Aucune section pour le moment.',
+    noFeeds: 'Aucun flux.',
+    noAssets: 'Aucun actif.',
+    noChannels: 'Aucune chaîne. Ajoutez-en une ci-dessous.',
+    noVideos: 'Aucune vidéo. Ajoutez des chaînes depuis ⚙',
+    noMarketsAdded: 'Ajoutez des actifs depuis ⚙',
+    loadingDots: 'Chargement…',
+    loadingVideos: 'Chargement des vidéos…',
+    errorFeed: 'Erreur lors du chargement du flux.',
+    errorMarkets: 'Erreur de chargement — CoinGecko limite peut-être les requêtes. Réessayez dans un instant.',
+    errorChannel: 'Impossible de charger la chaîne.',
+    errorImageLoad: '⚠ Impossible de charger l\'image',
+    wallPreview: 'Aperçu',
+    wallEnterUrl: 'Saisissez une URL d\'image ci-dessous',
+    searchWith: 'Rechercher avec',
+    searchOrUrl: 'ou saisir une URL…',
+    alertFillFields: 'Veuillez renseigner l\'ID CoinGecko et le symbole.',
+    alertAssetExists: 'Cet actif existe déjà.',
+    alertFillChannel: 'Veuillez saisir l\'ID de la chaîne.',
+    alertChannelExists: 'Chaîne déjà ajoutée.',
+    alertInvalidFile: 'Fichier invalide. Vérifiez qu\'il s\'agit d\'un export du tableau de bord.',
+    alertImportOk: '✓ Configuration importée avec succès.',
+    alertImportError: 'Erreur de lecture du fichier. Vérifiez qu\'il s\'agit d\'un JSON valide.',
+    alertAddFeed: 'Veuillez renseigner le nom et l\'URL.',
+    alertAddGroup: 'Veuillez saisir un nom de groupe.',
+    alertAddSection: 'Veuillez saisir un nom de section.',
+    importConfirmTitle: 'Importer la configuration de',
+    importConfirmSections: 'sections de liens',
+    importConfirmFeeds: 'flux RSS',
+    importConfirmMarkets: 'actifs de marché',
+    importConfirmChannels: 'chaînes vidéo',
+    importConfirmWarning: 'Cela remplacera votre configuration actuelle.',
+    exportFilename: 'dashboard-config',
+    syncActiveMsg: '⇅ Firefox Sync actif',
+    syncLocalMsg: 'local (sans synchronisation)',
+    feedsRss: 'Flux RSS',
+    newLinkIn: 'Nouveau lien dans :',
+    rssUrl: 'URL du flux RSS',
+    coingeckoId: 'ID CoinGecko',
+    channelId: 'ID de la chaîne',
+    slug: 'Slug',
+    videosTip: '💡 Astuce : si la chaîne a une URL avec <em>@pseudo</em>, trouvez l\'ID de la chaîne sur <a href="https://www.youtube.com/@pseudo/about" target="_blank" style="color:var(--accent-warm)">sa page À propos</a> → Partager → Copier l\'ID de la chaîne.',
+    groups: 'groupes',
+    linksWord: 'liens',
+    addGroupBtn: '+ Groupe',
+    addLinkBtn: '+ Lien',
+    noBackground: 'Aucun arrière-plan',
+    monitorsFound: 'moniteurs trouvés',
+    weekShort: 'sem',
+  },
+  de: {
+    settings: 'Einstellungen',
+    welcomeTitle: 'Willkommen',
+    welcomeLead: 'NewTab Dashboard macht aus deinem neuen Firefox-Tab ein minimalistisches Panel mit deinen Lieblingslinks, Nachrichten, Videos, Märkten und dem Status deiner Dienste.',
+    welcomeStep1Title: 'Öffne die Einstellungen',
+    welcomeStep1Text: 'Klicke auf das Zahnrad oben rechts (es erscheint, wenn du die Maus bewegst).',
+    welcomeStep2Title: 'Füge deine Links hinzu',
+    welcomeStep2Text: 'Erstelle Abschnitte, Gruppen und Links. Zum Umsortieren ziehen, zum Bearbeiten auf einen Namen klicken.',
+    welcomeStep3Title: 'Mach es zu deinem',
+    welcomeStep3Text: 'Aktiviere die gewünschten Widgets und wähle Design, Hintergrund und Sprache.',
+    welcomePrivacy: 'Alles wird in deinem Browser gespeichert und über dein Firefox-Konto synchronisiert. Es werden keine personenbezogenen Daten gesendet.',
+    welcomeStart: 'Los geht\'s',
+    welcomeOpenSettings: 'Einstellungen öffnen',
+    close: 'Schließen',
+    cancel: 'Abbrechen',
+    add: 'Hinzufügen',
+    apply: 'Anwenden',
+    restore: 'Zurücksetzen',
+    refresh: 'Aktualisieren',
+    manage: 'Verwalten',
+    name: 'Name',
+    items: 'Einträge',
+    popular: 'Beliebt…',
+    clickToSelect: 'Zum Auswählen klicken',
+    clickToAdd: 'Zum Hinzufügen klicken',
+    loading: 'Lädt...',
+    symbol: 'Symbol',
+    displayName: 'Anzeigename',
+    export: 'Exportieren',
+    import: 'Importieren',
+    news: 'Nachrichten',
+    feedEmpty: 'Füge unter Links einen RSS-Feed hinzu.',
+    goodMorning: 'Guten Morgen',
+    goodAfternoon: 'Guten Tag',
+    goodEvening: 'Guten Abend',
+    weather: 'Wetter',
+    wind: 'Wind',
+    humidity: 'Luftfeuchtigkeit',
+    feelsLike: 'Gefühlt',
+    calendar: 'Kalender',
+    markets: 'Märkte',
+    quickNote: 'Kurznotiz',
+    writeSomething: 'Schreib etwas...',
+    searchPlaceholder: 'Suchen oder URL eingeben...',
+    links: 'Links',
+    videos: 'Videos',
+    searchEngine: 'Suchmaschine',
+    background: 'Hintergrund',
+    language: 'Sprache',
+    linksHint: 'Gruppen sind in <strong>Abschnitten</strong> organisiert. Jeder Abschnitt ist eine Zeile mit Spalten im Dashboard. Zum Umsortieren ziehen, zum Bearbeiten auf einen Namen klicken.',
+    newSection: 'Neuer Abschnitt',
+    sectionName: 'Name des Abschnitts',
+    sectionPlaceholder: 'Arbeit, Dev, Zuhause…',
+    createSection: 'Abschnitt erstellen',
+    newGroupIn: 'Neue Gruppe in:',
+    groupName: 'Gruppenname',
+    groupPlaceholder: 'Gmail, GitHub, Proxmox…',
+    createGroup: 'Gruppe erstellen',
+    addLinkTo: 'Link hinzufügen zu:',
+    addLink: 'Link hinzufügen',
+    linkOpenLabel: 'Öffnen in',
+    linkOpenNew: 'Neuer Tab',
+    linkOpenSame: 'Aktueller Tab',
+    editSection: 'Abschnitt bearbeiten',
+    dragToReorder: 'Zum Umsortieren ziehen',
+    dropHere: 'Hier ablegen',
+    dropLinksHere: 'Link hierher ziehen',
+    dropGroupsHere: 'Gruppe hierher ziehen',
+    slotNewSection: 'Neuer Abschnitt',
+    slotNewGroup: 'Neue Gruppe',
+    slotNewLink: 'Neuer Link',
+    slotNewFeed: 'Neuer Feed',
+    slotNewAsset: 'Neuer Wert',
+    editFeed: 'Feed bearbeiten',
+    editAsset: 'Wert bearbeiten',
+    dropWidgetsHere: 'Widget hierher ziehen',
+    slotNewChannel: 'Neuer Kanal',
+    editChannel: 'Kanal bearbeiten',
+    videosWord: 'Videos',
+    channelDefaultName: 'Kanal',
+    clickToEdit: 'Zum Bearbeiten klicken',
+    editGroup: 'Gruppe bearbeiten',
+    linkOpenWindow: 'Neues Fenster',
+    general: 'Allgemein',
+    appearanceTab: 'Design und Text',
+    grpContent: 'Meine Seite',
+    grpPersonalize: 'Anpassen',
+    grpWidgetSettings: 'Widget-Einstellungen',
+    grpHelp: 'Hilfe',
+    desc_links: 'Ordne deine Lieblingslinks in Abschnitten und Gruppen.',
+    desc_videos: 'Füge YouTube-Kanäle hinzu, um ihre neuesten Videos zu sehen.',
+    desc_widgets: 'Wähle, welche Panels angezeigt werden, auf welcher Seite und in welcher Reihenfolge.',
+    desc_appearance: 'Ändere die Farben und die Textgröße.',
+    desc_background: 'Wähle ein Hintergrundbild oder einen Farbverlauf und passe das Aussehen an.',
+    desc_general: 'Wähle deine Standard-Suchmaschine und die Sprache der Oberfläche.',
+    desc_feeds: 'Füge die Nachrichtenseiten (RSS) hinzu, die du lesen möchtest.',
+    desc_uptime: 'Verbinde deinen Uptime Kuma, um den Status deiner Dienste zu sehen.',
+    desc_proxmox: 'Verbinde deinen Proxmox-Server, um seinen Status zu sehen.',
+    desc_docker: 'Verbinde Portainer, um deine Docker-Container zu sehen.',
+    desc_pihole: 'Verbinde Pi-hole, um die Blockierstatistiken zu sehen.',
+    desc_markets: 'Wähle die Kryptowährungen, denen du folgen möchtest.',
+    desc_about: 'Version der Erweiterung, Neuerungen und Links.',
+    iconLabel: 'Symbol — eigene URL <span style="color:var(--text-dim);font-weight:300">(optional, wird automatisch vorgeschlagen)</span>',
+    addFeed: 'Feed hinzufügen',
+    marketsHint: 'Echtzeitpreise über CoinGecko (kostenlos, ohne API-Schlüssel). Gib die <strong>CoinGecko-ID</strong> jedes Wertes ein (z. B. <em>bitcoin</em>, <em>ethereum</em>, <em>solana</em>).',
+    addAsset: 'Wert hinzufügen',
+    videosHint: 'Füge YouTube-Kanäle über ihre <strong>Kanal-ID</strong> oder ihren <strong>@Handle</strong> hinzu.',
+    videosHintHandle: '💡 Du kannst den @Handle direkt verwenden: <em>@naseros</em>, <em>@SoyITPro</em>… Die ID wird automatisch aufgelöst.',
+    addChannel: 'Kanal hinzufügen',
+    videosToShow: 'Anzuzeigende Videos',
+    manageChannels: 'Kanäle verwalten',
+    engineHint: 'Wähle die Standard-Suchmaschine. Direkte URLs werden immer ohne Suchmaschine geöffnet.',
+    wallHint: 'Gib unten eine Bild-URL ein',
+    imageUrl: 'Bild-URL',
+    wallUrlHint: 'Unsplash, Picsum, jede öffentliche direkte URL · wird zwischen Geräten synchronisiert',
+    wallType: 'Hintergrundtyp',
+    wallTypeUrl: 'URL',
+    wallTypeBing: 'Bing',
+    wallTypeWallhaven: 'Wallhaven',
+    wallTypeGradient: 'Farbverläufe',
+    bingApply: 'Bing-Hintergrund des Tages verwenden',
+    bingHint: 'Bing-Bild des Tages. Wird jeden Tag automatisch aktualisiert.',
+    wallhavenSearchPh: 'Hintergrundbilder suchen…',
+    wallhavenHint: 'Wallhaven (nur SFW). Suchen und auf ein Bild klicken, um es anzuwenden.',
+    search: 'Suchen',
+    presetGradients: 'Vordefinierte Farbverläufe',
+    opacity: 'Deckkraft',
+    darken: 'Abdunkeln',
+    blur: 'Unschärfe',
+    tint: 'Farbton',
+    glass: 'Glas',
+    removeBackground: 'Hintergrund entfernen',
+    langHint: 'Wähle die Sprache der Oberfläche.',
+    synced: '↑ synchronisiert',
+    syncing: '↑ synchronisiert…',
+    syncError: '⚠ Synchronisierungsfehler',
+    videosLabel: 'VIDEOS',
+    days: ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'],
+    months: ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'],
+    monthsGen: ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'],
+    monthsShort: ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'],
+    dow: ['Mo','Di','Mi','Do','Fr','Sa','So'],
+    weatherCodes: {0:'Klar',1:'Überwiegend klar',2:'Teils bewölkt',3:'Bedeckt',45:'Nebel',48:'Nebel',51:'Nieselregen',61:'Regen',63:'Regen',65:'Regen',71:'Schnee',80:'Schauer',81:'Schauer',95:'Gewitter'},
+    appearance: 'Darstellung',
+    theme: 'Design',
+    themeHint: 'Passe die Farbpalette der Oberfläche an.',
+    fontSize: 'Schriftgröße',
+    editLink: 'Link bearbeiten',
+    alertAddLink: 'Bitte Name und URL ausfüllen.',
+    uptime: 'Uptime',
+    uptimeHint: 'Verbinde dich über eine öffentliche Statusseite mit deiner Uptime-Kuma-Instanz. Keine Zugangsdaten erforderlich.',
+    uptimeUrl: 'Uptime-Kuma-URL',
+    uptimeMode: 'Layout',
+    uptimeExtended: 'Erweitert',
+    uptimeCompact: 'Kompakt',
+    save: 'Speichern',
+    remove: 'Entfernen',
+    uptimeAllUp: 'Alles in Betrieb',
+    uptimePartial: 'Eingeschränkt',
+    uptimeDown: 'Aktive Störung',
+    uptimeError: 'Verbindungsfehler',
+    uptimeLoading: 'Verbinde…',
+    widgets: 'Widgets',
+    widgetsHint: 'Ziehe jedes Widget in die linke oder rechte Spalte und ordne sie nach Belieben an. Mit dem Schalter aktivierst oder deaktivierst du es; nur aktive Widgets werden im Dashboard angezeigt.',
+    clockWidget: 'Uhr',
+    colLeft: 'Links',
+    colRight: 'Rechts',
+    proxmoxWidget: 'Proxmox',
+    dockerWidget: 'Docker',
+    piholeWidget: 'Pi-hole',
+    proxmoxHint: 'Status der VMs und LXC-Container deines Proxmox-VE-Clusters über ein (schreibgeschütztes) API-Token. Erfordert einen vom Browser erreichbaren HTTPS-Zugang.',
+    proxmoxSetup: '<strong>So erzeugst du das Token</strong><ol class="svc-steps"><li>In Proxmox: <em>Datacenter → Permissions → API Tokens → Add</em>.</li><li>Wähle den Benutzer (z. B. <em>root@pam</em>) und einen Token-Namen. <strong>Deaktiviere „Privilege Separation“</strong> und kopiere das Secret (wird nur einmal angezeigt).</li><li>Die <strong>Token-ID</strong> lautet <em>benutzer@realm!name</em> (z. B. <em>root@pam!dashboard</em>); das <strong>Secret</strong> ist die angezeigte UUID.</li><li>Wenn du <em>0/0</em> siehst, hat das Token keine Berechtigungen: unter <em>Permissions → Add → API Token Permission</em>, Pfad <em>/</em>, Rolle <strong>PVEAuditor</strong>.</li></ol>',
+    dockerHint: 'Status deiner Docker-Container über die Portainer-API mit einem API-Schlüssel.',
+    dockerSetup: '<strong>So erhältst du den API-Schlüssel</strong><ol class="svc-steps"><li>In Portainer, oben rechts: <em>dein Benutzer → My account → Access tokens → Add access token</em>.</li><li>Kopiere das erzeugte Token (beginnt mit <em>ptr_</em>). <strong>Das</strong> ist der API-Schlüssel — keine URL.</li><li><strong>Endpoint-ID</strong>: die Nummer der Umgebung in Portainer (meist <em>1</em>). <strong>Leer lassen für automatische Erkennung.</strong></li></ol>',
+    piholeHint: 'Statistiken von Pi-hole v6 (Anfragen und Blockierung). Gib das App-Passwort deines Pi-hole ein.',
+    proxmoxTokenId: 'Token-ID (benutzer@realm!name)',
+    proxmoxSecret: 'Token-Secret',
+    dockerApiKey: 'API-Schlüssel',
+    dockerEndpoint: 'Endpoint-ID',
+    piholePassword: 'App-Passwort',
+    proxmoxVms: 'VMs/CTs gefunden',
+    dockerContainers: 'Container',
+    dockerRunning: 'Container',
+    dockerStopped: 'Gestoppt',
+    dockerImages: 'Images',
+    proxmoxVmsLabel: 'VMs',
+    proxmoxMonitor: 'VMs überwachen (optional)',
+    proxmoxSelectHint: 'Wähle, welche VMs unter den Statistiken im Detail angezeigt werden.',
+    piholeQueries: 'Anfragen',
+    piholeBlocked: 'Blockiert',
+    piholeDomains: 'Domains',
+    piholeBlockPct: 'Blockiert',
+    svcUrl: 'Server-URL',
+    svcName: 'Name (optional)',
+    svcFillFields: 'URL und Zugangsdaten ausfüllen.',
+    svcConnError: 'Verbindung nicht möglich (Zertifikat oder URL?)',
+    svcHttpError: 'Serverfehler',
+    svcAuthError: 'Ungültige Zugangsdaten',
+    svcTimeout: 'Zeitüberschreitung der Anfrage',
+    svcOpenUrl: 'URL öffnen und das Zertifikat akzeptieren',
+    about: 'Über',
+    aboutTagline: 'Ein minimalistischer neuer Tab für Firefox',
+    aboutProject: 'Projekt',
+    aboutDeveloper: 'Entwickler',
+    aboutContributors: 'Mitwirkende',
+    aboutContributorsLink: 'Mitwirkende ansehen',
+    aboutChangelog: 'Neuerungen',
+    aboutVersionLabel: 'Version',
+    aboutLicense: 'Lizenz',
+    aboutLicenseHint: 'Veröffentlicht unter der MIT-Lizenz: freie Open-Source-Software. Du darfst sie ohne Einschränkungen verwenden, ändern und weitergeben, sofern der Copyright-Hinweis erhalten bleibt.',
+    aboutPrivacy: 'Alle deine Einstellungen werden <strong>in deinem eigenen Browser</strong> gespeichert und über dein Firefox-Konto synchronisiert. Die Erweiterung erhebt oder sendet keine personenbezogenen Daten und benötigt keine API-Schlüssel.',
+    noItems: 'Keine Einträge.',
+    noSections: 'Noch keine Abschnitte.',
+    noFeeds: 'Keine Feeds.',
+    noAssets: 'Keine Werte.',
+    noChannels: 'Keine Kanäle. Füge unten einen hinzu.',
+    noVideos: 'Keine Videos. Füge Kanäle über ⚙ hinzu',
+    noMarketsAdded: 'Füge Werte über ⚙ hinzu',
+    loadingDots: 'Lädt…',
+    loadingVideos: 'Videos werden geladen…',
+    errorFeed: 'Fehler beim Laden des Feeds.',
+    errorMarkets: 'Fehler beim Laden — CoinGecko begrenzt möglicherweise die Anfragen. Versuche es gleich noch einmal.',
+    errorChannel: 'Kanal konnte nicht geladen werden.',
+    errorImageLoad: '⚠ Bild konnte nicht geladen werden',
+    wallPreview: 'Vorschau',
+    wallEnterUrl: 'Gib unten eine Bild-URL ein',
+    searchWith: 'Suchen mit',
+    searchOrUrl: 'oder URL eingeben…',
+    alertFillFields: 'Bitte CoinGecko-ID und Symbol ausfüllen.',
+    alertAssetExists: 'Dieser Wert existiert bereits.',
+    alertFillChannel: 'Bitte die Kanal-ID eingeben.',
+    alertChannelExists: 'Kanal bereits hinzugefügt.',
+    alertInvalidFile: 'Ungültige Datei. Stelle sicher, dass es sich um einen Dashboard-Export handelt.',
+    alertImportOk: '✓ Konfiguration erfolgreich importiert.',
+    alertImportError: 'Fehler beim Lesen der Datei. Stelle sicher, dass es gültiges JSON ist.',
+    alertAddFeed: 'Bitte Name und URL ausfüllen.',
+    alertAddGroup: 'Bitte einen Gruppennamen eingeben.',
+    alertAddSection: 'Bitte einen Abschnittsnamen eingeben.',
+    importConfirmTitle: 'Konfiguration importieren von',
+    importConfirmSections: 'Link-Abschnitte',
+    importConfirmFeeds: 'RSS-Feeds',
+    importConfirmMarkets: 'Marktwerte',
+    importConfirmChannels: 'Videokanäle',
+    importConfirmWarning: 'Dadurch wird deine aktuelle Konfiguration ersetzt.',
+    exportFilename: 'dashboard-config',
+    syncActiveMsg: '⇅ Firefox Sync aktiv',
+    syncLocalMsg: 'lokal (keine Synchronisierung)',
+    feedsRss: 'RSS-Feeds',
+    newLinkIn: 'Neuer Link in:',
+    rssUrl: 'RSS-URL',
+    coingeckoId: 'CoinGecko-ID',
+    channelId: 'Kanal-ID',
+    slug: 'Slug',
+    videosTip: '💡 Tipp: Hat der Kanal eine URL mit <em>@Name</em>, findest du die Kanal-ID auf <a href="https://www.youtube.com/@name/about" target="_blank" style="color:var(--accent-warm)">der Infoseite</a> → Teilen → Kanal-ID kopieren.',
+    groups: 'Gruppen',
+    linksWord: 'Links',
+    addGroupBtn: '+ Gruppe',
+    addLinkBtn: '+ Link',
+    noBackground: 'Kein Hintergrund',
+    monitorsFound: 'Monitore gefunden',
+    weekShort: 'Wo.',
+  },
 };
 
 let currentLang = 'es';
@@ -831,6 +1449,8 @@ function applyLang(langCode, save=true) {
     const key = el.dataset.i18nPlaceholder;
     if (t[key] !== undefined) el.placeholder = t[key];
   });
+
+  updatePanelHead();
 
   // Search input placeholder
   const si = document.getElementById('searchInput');
@@ -868,6 +1488,8 @@ function getBrowserLang() {
 function getLocale() {
   if (currentLang === 'ru') return 'ru-RU';
   if (currentLang === 'es') return 'es-ES';
+  if (currentLang === 'fr') return 'fr-FR';
+  if (currentLang === 'de') return 'de-DE';
   return 'en-GB';
 }
 
@@ -878,6 +1500,8 @@ function renderLangModal() {
     { code:'es', label:'Español', flag:'🇪🇸' },
     { code:'en', label:'English', flag:'🇬🇧' },
     { code:'ru', label:'Русский', flag:'🇷🇺' },
+    { code:'fr', label:'Français', flag:'🇫🇷' },
+    { code:'de', label:'Deutsch', flag:'🇩🇪' },
   ];
   langs.forEach(l => {
     const row = document.createElement('div'); row.className = 'engine-row' + (l.code === currentLang ? ' active' : '');
@@ -1052,6 +1676,13 @@ function getSimpleIconUrl(name, url) {
   return null;
 }
 
+// Links created before 'openIn' existed only carry the boolean sameTab
+function linkOpenMode(l) { return l.openIn || (l.sameTab ? 'same' : 'new'); }
+function openInNewWindow(url) {
+  if (typeof browser !== 'undefined' && browser.windows) browser.windows.create({ url });
+  else window.open(url, '_blank', 'noopener,noreferrer,popup');
+}
+
 function mkLinkIcon(link) {
   const wrap = document.createElement('div'); wrap.className = 'link-icon-wrap';
   const img = document.createElement('img'); img.className = 'link-fav';
@@ -1100,7 +1731,11 @@ function renderSections() {
       const name = document.createElement('div'); name.className = 'group-col-name'; name.textContent = g.name;
       col.appendChild(name);
       g.links.forEach(l => {
-        const a = document.createElement('a'); a.className = 'link-row'; a.href = l.url; a.target = '_blank';
+        const a = document.createElement('a'); a.className = 'link-row'; a.href = l.url;
+        const mode = linkOpenMode(l);
+        if (mode === 'same') a.target = '_self';
+        else { a.target = '_blank'; a.rel = 'noopener noreferrer'; }
+        if (mode === 'window') a.addEventListener('click', e => { e.preventDefault(); openInNewWindow(l.url); });
         a.appendChild(mkLinkIcon(l));
         const nm = document.createElement('span'); nm.className = 'link-name'; nm.textContent = l.name;
         const arr = document.createElement('span'); arr.className = 'link-arrow'; arr.textContent = '↗';
@@ -1265,57 +1900,44 @@ function toggleWidget(id) {
   w.active = !w.active;
   saveWidgets(); renderWidgetLayout(); renderModalNav(); renderWidgetsModal();
 }
-function setWidgetCol(id, col) {
-  const w = widgets.find(x => x.id===id); if (!w || w.col===col) return;
-  w.col = col;
-  saveWidgets(); renderWidgetLayout(); renderWidgetsModal();
-}
-function moveWidget(id, dir) {
-  const i = widgets.findIndex(x => x.id===id); const ni = i + dir;
-  if (i<0 || ni<0 || ni>=widgets.length) return;
-  [widgets[i], widgets[ni]] = [widgets[ni], widgets[i]];
-  saveWidgets(); renderWidgetLayout(); renderWidgetsModal();
-}
 
+// Two columns (left / right bar); drag a widget to reorder it or move it to the other column
 function renderWidgetsModal() {
   const box = document.getElementById('widgetManager'); if (!box) return;
-  box.innerHTML = '';
-  widgets.forEach((w, idx) => {
-    const row = document.createElement('div'); row.className = 'widget-row' + (w.active ? '' : ' inactive');
+  box.textContent = '';
+  [['left', t.colLeft], ['right', t.colRight]].forEach(([col, label]) => {
+    const colEl = document.createElement('div'); colEl.className = 'widget-col';
+    const items = widgets.filter(w => (w.col === 'right' ? 'right' : 'left') === col);
 
-    // Active toggle (switch)
-    const sw = document.createElement('button');
-    sw.className = 'widget-switch' + (w.active ? ' on' : '');
-    sw.setAttribute('role', 'switch');
-    sw.setAttribute('aria-checked', w.active ? 'true' : 'false');
-    const knob = document.createElement('span'); knob.className = 'widget-switch-knob'; sw.appendChild(knob);
-    sw.addEventListener('click', () => toggleWidget(w.id));
+    const head = document.createElement('div'); head.className = 'widget-col-head';
+    const title = document.createElement('span'); title.textContent = label;
+    const count = document.createElement('span'); count.className = 'widget-col-count'; count.textContent = String(items.length);
+    head.appendChild(title); head.appendChild(count);
 
-    // Name
-    const name = document.createElement('div'); name.className = 'widget-row-name'; name.textContent = widgetName(w.id);
+    const list = document.createElement('div'); list.className = 'widget-col-list';
+    makeDropList(list, 'widget', { col }, t.dropWidgetsHere);
+    items.forEach(w => {
+      const row = document.createElement('div'); row.className = 'widget-row' + (w.active ? '' : ' inactive');
 
-    // Column segmented control (left / right)
-    const seg = document.createElement('div'); seg.className = 'widget-seg';
-    [['left', t.colLeft], ['right', t.colRight]].forEach(([col, label]) => {
-      const b = document.createElement('button');
-      b.className = 'widget-seg-btn' + (w.col===col ? ' active' : '');
-      b.textContent = label;
-      b.disabled = !w.active;
-      b.addEventListener('click', () => setWidgetCol(w.id, col));
-      seg.appendChild(b);
+      // Active toggle (switch)
+      const sw = document.createElement('button');
+      sw.className = 'widget-switch' + (w.active ? ' on' : '');
+      sw.setAttribute('role', 'switch');
+      sw.setAttribute('aria-checked', w.active ? 'true' : 'false');
+      const knob = document.createElement('span'); knob.className = 'widget-switch-knob'; sw.appendChild(knob);
+      sw.addEventListener('click', () => toggleWidget(w.id));
+
+      const name = document.createElement('div'); name.className = 'widget-row-name'; name.textContent = widgetName(w.id);
+
+      row.appendChild(makeGrip()); row.appendChild(name); row.appendChild(sw);
+      makeDraggable(row, 'widget', { widgetId: w.id }, row);
+      list.appendChild(row);
     });
 
-    // Reorder up / down
-    const ord = document.createElement('div'); ord.className = 'widget-ord';
-    const up = document.createElement('button'); up.className = 'btn btn-ghost btn-sm'; up.textContent = '↑';
-    up.disabled = idx===0; up.addEventListener('click', () => moveWidget(w.id, -1));
-    const dn = document.createElement('button'); dn.className = 'btn btn-ghost btn-sm'; dn.textContent = '↓';
-    dn.disabled = idx===widgets.length-1; dn.addEventListener('click', () => moveWidget(w.id, 1));
-    ord.appendChild(up); ord.appendChild(dn);
-
-    row.appendChild(sw); row.appendChild(name); row.appendChild(seg); row.appendChild(ord);
-    box.appendChild(row);
+    colEl.appendChild(head); colEl.appendChild(list);
+    box.appendChild(colEl);
   });
+  lastDropped = null;
 }
 
 // ════════════════════════════════════════════════
@@ -1323,16 +1945,67 @@ function renderWidgetsModal() {
 // ════════════════════════════════════════════════
 function openModal(tab='links') { document.getElementById('modalOverlay').classList.add('open'); renderModalNav(); switchTab(tab); }
 function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); resetPending(); }
-function resetPending() { pendingSection=null; pendingGroup=null; document.getElementById('addGroupForm').style.display='none'; document.getElementById('addLinkForm').style.display='none'; }
+function resetPending() { pendingSection=null; pendingGroup=null; hideForms(); }
+
+// Add/edit forms live in their own dialog on top of the settings modal
+const FORM_IDS = ['addSectionForm','addGroupForm','addLinkForm','editLinkForm','addChannelForm','addFeedForm','presetPanel','addMarketForm','marketPresetPanel'];
+function showForm(id) {
+  FORM_IDS.forEach(f => { document.getElementById(f).style.display = f===id ? 'flex' : 'none'; });
+  document.getElementById('formOverlay').classList.add('open');
+}
+function hideForms() {
+  renameTarget = null;
+  FORM_IDS.forEach(f => { document.getElementById(f).style.display = 'none'; });
+  document.getElementById('formOverlay').classList.remove('open');
+}
+function setFormTexts(form, title, btn) {
+  const f = document.getElementById(form);
+  f.querySelector('.add-form-title [data-i18n], .add-form-title[data-i18n]').textContent = title;
+  f.querySelector('.btn-primary').textContent = btn;
+}
+function openEditSection(sectionId) {
+  const sec = sections.find(s => s.id===sectionId); if (!sec) return;
+  pendingSection = null; pendingGroup = null; renameTarget = { sectionId };
+  setFormTexts('addSectionForm', t.editSection, t.save);
+  document.getElementById('sName').value = sec.name;
+  showForm('addSectionForm');
+  document.getElementById('sName').focus();
+}
+function openEditGroup(sectionId, groupId) {
+  const sec = sections.find(s => s.id===sectionId);
+  const grp = sec && sec.groups.find(g => g.id===groupId); if (!grp) return;
+  pendingSection = null; pendingGroup = null; renameTarget = { sectionId, groupId };
+  setFormTexts('addGroupForm', t.editGroup + ':', t.save);
+  document.getElementById('addGroupSectionName').textContent = sec.name;
+  document.getElementById('gName').value = grp.name;
+  showForm('addGroupForm');
+  document.getElementById('gName').focus();
+}
+function openAddSection() {
+  pendingSection = null; pendingGroup = null; renameTarget = null;
+  setFormTexts('addSectionForm', t.newSection, t.createSection);
+  document.getElementById('sName').value = '';
+  showForm('addSectionForm');
+  document.getElementById('sName').focus();
+}
+
+// Title + one-line description shown at the top of the active settings panel
+function updatePanelHead() {
+  const tab = document.querySelector('.modal-tab.active');
+  if (!tab) return;
+  document.getElementById('panelTitle').textContent = tab.querySelector('span').textContent;
+  document.getElementById('panelDesc').textContent = t['desc_' + tab.dataset.tab] || '';
+}
 
 function switchTab(tab) {
   document.querySelectorAll('.modal-tab').forEach(t => t.classList.toggle('active', t.dataset.tab===tab));
-  document.querySelectorAll('.modal-panel').forEach(p => p.classList.toggle('active', p.id==='tab-'+tab));
+  document.querySelectorAll('.modal-panel').forEach(p => p.classList.toggle('active', p.id==='tab-'+tab || p.dataset.in===tab));
+  updatePanelHead();
+  document.querySelector('.modal-body').scrollTop = 0;
   if (tab==='links') renderSectionModal();
   if (tab==='feeds') renderFeedModal();
   if (tab==='markets') renderMarketModal();
-  if (tab==='engine')  renderEngineModal();
-  if (tab==='lang')    renderLangModal();
+  if (tab==='general') { renderEngineModal(); renderLangModal(); }
   if (tab==='uptime')  renderUptimeModal();
   if (tab==='proxmox') renderProxmoxModal();
   if (tab==='docker')  renderDockerModal();
@@ -1340,7 +2013,8 @@ function switchTab(tab) {
   if (tab==='videos')  renderVideoChannelModal();
   if (tab==='widgets') renderWidgetsModal();
   if (tab==='about')   renderAbout();
-  if (tab==='appearance') { renderThemeModal(); renderGradientPresets(); renderWallSource(); updateWallPreview(wallSettings.type==='gradient' ? wallSettings.grad : ((wallSettings.type==='image'||wallSettings.type==='bing') ? wallSettings.src : null)); }
+  if (tab==='appearance') renderThemeModal();
+  if (tab==='background') { renderGradientPresets(); renderWallSource(); updateWallPreview(wallSettings.type==='gradient' ? wallSettings.grad : ((wallSettings.type==='image'||wallSettings.type==='bing') ? wallSettings.src : null)); }
 }
 
 // ── Section / Group / Link modal ──
@@ -1349,85 +2023,108 @@ function makeBtn(cls, text, fn) {
   b.addEventListener('click', fn); return b;
 }
 
+// Clicking a row's text opens its edit dialog
+function makeEditable(el, fn) {
+  el.classList.add('click-edit'); el.title = t.clickToEdit;
+  el.addEventListener('click', fn);
+}
+
+// Dashed "add here" slot: shows where something can be added
+function makeAddSlot(kind, label, fn) {
+  const d = document.createElement('div');
+  d.className = 'add-slot add-slot-' + kind; d.tabIndex = 0; d.setAttribute('role', 'button');
+  const ic = document.createElement('span'); ic.className = 'add-slot-icon'; ic.textContent = '+';
+  const tx = document.createElement('span'); tx.className = 'add-slot-label'; tx.textContent = label;
+  d.appendChild(ic); d.appendChild(tx);
+  d.addEventListener('click', fn);
+  d.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } });
+  return d;
+}
+function makeGrip() {
+  const g = document.createElement('span'); g.className = 'drag-grip'; g.textContent = '⋮⋮'; g.title = t.dragToReorder;
+  return g;
+}
+
 function renderSectionModal() {
-  const list = document.getElementById('sectionItemList'); list.innerHTML='';
-  if (!sections.length) { setMsg(list, 'empty-state', t.noSections); return; }
+  const list = document.getElementById('sectionItemList'); list.textContent = '';
+  makeDropList(list, 'section', {});
+  if (!sections.length) setMsg(list, 'empty-state', t.noSections);
 
-  sections.forEach((sec, si) => {
+  sections.forEach(sec => {
     // Section card
-    const sc = document.createElement('div'); sc.className='item-card'; sc.style.flexDirection='column'; sc.style.alignItems='stretch'; sc.style.gap='8px';
+    const sc = document.createElement('div'); sc.className = 'item-card dnd-section';
 
-    const scHead = document.createElement('div'); scHead.style.cssText='display:flex;align-items:center;gap:9px;';
-    const scInfo = document.createElement('div'); scInfo.className='item-card-info';
-    const scName = document.createElement('div'); scName.className='item-card-name'; scName.textContent=sec.name;
-    const scSub  = document.createElement('div'); scSub.className='item-card-sub'; scSub.textContent=sec.groups.length+' '+t.groups;
+    const scHead = document.createElement('div'); scHead.className = 'dnd-head';
+    const scInfo = document.createElement('div'); scInfo.className = 'item-card-info';
+    const scName = document.createElement('div'); scName.className = 'item-card-name'; scName.textContent = sec.name;
+    const scSub  = document.createElement('div'); scSub.className = 'item-card-sub'; scSub.textContent = sec.groups.length + ' ' + t.groups;
     scInfo.appendChild(scName); scInfo.appendChild(scSub);
+    makeEditable(scInfo, () => openEditSection(sec.id));
 
-    const scAct = document.createElement('div'); scAct.className='item-card-actions';
-    scAct.appendChild(makeBtn('btn btn-ghost btn-sm', t.addGroupBtn, () => openAddGroup(sec.id)));
-    if (si>0)               scAct.appendChild(makeBtn('btn btn-ghost btn-sm','↑',() => moveSection(sec.id,-1)));
-    if (si<sections.length-1) scAct.appendChild(makeBtn('btn btn-ghost btn-sm','↓',() => moveSection(sec.id, 1)));
-    scAct.appendChild(makeBtn('btn btn-danger btn-sm','×',() => deleteSection(sec.id)));
+    const scAct = document.createElement('div'); scAct.className = 'item-card-actions';
+    scAct.appendChild(makeBtn('btn btn-danger btn-sm', '×', () => deleteSection(sec.id)));
 
-    scHead.appendChild(scInfo); scHead.appendChild(scAct);
+    scHead.appendChild(makeGrip()); scHead.appendChild(scInfo); scHead.appendChild(scAct);
     sc.appendChild(scHead);
 
     // Groups inside section
-    if (sec.groups.length) {
-      const subList = document.createElement('div'); subList.className='modal-sub-list';
-      sec.groups.forEach((g, gi) => {
-        const gc = document.createElement('div'); gc.className='modal-sub-card'; gc.style.flexDirection='column'; gc.style.alignItems='stretch'; gc.style.gap='6px';
+    const subList = document.createElement('div'); subList.className = 'modal-sub-list';
+    makeDropList(subList, 'group', { sectionId: sec.id }, t.dropGroupsHere);
+    sec.groups.forEach(g => {
+      const gc = document.createElement('div'); gc.className = 'modal-sub-card dnd-group';
 
-        const gcHead = document.createElement('div'); gcHead.style.cssText='display:flex;align-items:center;gap:8px;';
-        const gcInfo = document.createElement('div'); gcInfo.className='item-card-info';
-        const gcName = document.createElement('div'); gcName.className='item-card-name'; gcName.style.fontSize='11.5px'; gcName.textContent=g.name;
-        const gcSub  = document.createElement('div'); gcSub.className='item-card-sub'; gcSub.textContent=g.links.length+' '+t.linksWord;
-        gcInfo.appendChild(gcName); gcInfo.appendChild(gcSub);
+      const gcHead = document.createElement('div'); gcHead.className = 'dnd-head';
+      const gcInfo = document.createElement('div'); gcInfo.className = 'item-card-info';
+      const gcName = document.createElement('div'); gcName.className = 'item-card-name'; gcName.style.fontSize = '11.5px'; gcName.textContent = g.name;
+      const gcSub  = document.createElement('div'); gcSub.className = 'item-card-sub'; gcSub.textContent = g.links.length + ' ' + t.linksWord;
+      gcInfo.appendChild(gcName); gcInfo.appendChild(gcSub);
+      makeEditable(gcInfo, () => openEditGroup(sec.id, g.id));
 
-        const gcAct = document.createElement('div'); gcAct.className='item-card-actions';
-        gcAct.appendChild(makeBtn('btn btn-ghost btn-sm',t.addLinkBtn,() => openAddLink(sec.id, g.id)));
-        if (gi>0)               gcAct.appendChild(makeBtn('btn btn-ghost btn-sm','↑',() => moveGroup(sec.id,g.id,-1)));
-        if (gi<sec.groups.length-1) gcAct.appendChild(makeBtn('btn btn-ghost btn-sm','↓',() => moveGroup(sec.id,g.id, 1)));
-        gcAct.appendChild(makeBtn('btn btn-danger btn-sm','×',() => deleteGroup(sec.id,g.id)));
+      const gcAct = document.createElement('div'); gcAct.className = 'item-card-actions';
+      gcAct.appendChild(makeBtn('btn btn-danger btn-sm', '×', () => deleteGroup(sec.id, g.id)));
 
-        gcHead.appendChild(gcInfo); gcHead.appendChild(gcAct);
-        gc.appendChild(gcHead);
+      gcHead.appendChild(makeGrip()); gcHead.appendChild(gcInfo); gcHead.appendChild(gcAct);
+      gc.appendChild(gcHead);
 
-        // Links inside group
-        if (g.links.length) {
-          const lList = document.createElement('div'); lList.style.cssText='display:flex;flex-direction:column;gap:2px;padding-left:10px;';
-          g.links.forEach((l, li) => {
-            const lc = document.createElement('div'); lc.style.cssText='display:flex;align-items:center;gap:7px;padding:3px 0;';
-            const lInfo = document.createElement('div'); lInfo.style.cssText='flex:1;min-width:0;';
-            const lName = document.createElement('span'); lName.style.cssText='font-size:11px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;'; lName.textContent=l.name;
-            const lSub  = document.createElement('span'); lSub.style.cssText='font-size:9.5px;color:var(--text-muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;'; lSub.textContent=l.url;
-            lInfo.appendChild(lName); lInfo.appendChild(lSub);
-            const lAct = document.createElement('div'); lAct.className='item-card-actions';
-            lAct.appendChild(makeBtn('btn btn-ghost btn-sm','✎',() => openEditLink(sec.id,g.id,l.id)));
-            if (li>0)              lAct.appendChild(makeBtn('btn btn-ghost btn-sm','↑',() => moveLink(sec.id,g.id,l.id,-1)));
-            if (li<g.links.length-1) lAct.appendChild(makeBtn('btn btn-ghost btn-sm','↓',() => moveLink(sec.id,g.id,l.id, 1)));
-            lAct.appendChild(makeBtn('btn btn-danger btn-sm','×',() => deleteLink(sec.id,g.id,l.id)));
-            lc.appendChild(lInfo); lc.appendChild(lAct);
-            lList.appendChild(lc);
-          });
-          gc.appendChild(lList);
-        }
-
-        subList.appendChild(gc);
+      // Links inside group
+      const lList = document.createElement('div'); lList.className = 'link-drag-list';
+      makeDropList(lList, 'link', { sectionId: sec.id, groupId: g.id }, t.dropLinksHere);
+      g.links.forEach(l => {
+        const lc = document.createElement('div'); lc.className = 'link-drag-row';
+        const lInfo = document.createElement('div'); lInfo.style.cssText = 'flex:1;min-width:0;';
+        const lName = document.createElement('span'); lName.style.cssText = 'font-size:11px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;'; lName.textContent = l.name;
+        const lSub  = document.createElement('span'); lSub.style.cssText = 'font-size:9.5px;color:var(--text-muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;'; lSub.textContent = l.url;
+        lInfo.appendChild(lName); lInfo.appendChild(lSub);
+        makeEditable(lInfo, () => openEditLink(sec.id, g.id, l.id));
+        const lAct = document.createElement('div'); lAct.className = 'item-card-actions';
+        lAct.appendChild(makeBtn('btn btn-danger btn-sm', '×', () => deleteLink(sec.id, g.id, l.id)));
+        lc.appendChild(makeGrip()); lc.appendChild(lInfo); lc.appendChild(lAct);
+        makeDraggable(lc, 'link', { sectionId: sec.id, groupId: g.id, linkId: l.id }, lc);
+        lList.appendChild(lc);
       });
-      sc.appendChild(subList);
-    }
+      lList.appendChild(makeAddSlot('link', t.slotNewLink, () => openAddLink(sec.id, g.id)));
+      gc.appendChild(lList);
+
+      makeDraggable(gc, 'group', { sectionId: sec.id, groupId: g.id }, gcHead);
+      subList.appendChild(gc);
+    });
+    subList.appendChild(makeAddSlot('group', t.slotNewGroup, () => openAddGroup(sec.id)));
+    sc.appendChild(subList);
+
+    makeDraggable(sc, 'section', { sectionId: sec.id }, scHead);
     list.appendChild(sc);
   });
+  list.appendChild(makeAddSlot('section', t.slotNewSection, openAddSection));
+  lastDropped = null;
 }
 
 // Pending add forms
 function openAddGroup(sectionId) {
-  pendingSection = sectionId; pendingGroup = null;
+  pendingSection = sectionId; pendingGroup = null; renameTarget = null;
+  setFormTexts('addGroupForm', t.newGroupIn, t.createGroup);
   const sec = sections.find(s => s.id===sectionId);
   document.getElementById('addGroupSectionName').textContent = sec ? sec.name : '';
-  document.getElementById('addGroupForm').style.display = 'flex';
-  document.getElementById('addLinkForm').style.display  = 'none';
+  showForm('addGroupForm');
   document.getElementById('gName').value = '';
   document.getElementById('gName').focus();
 }
@@ -1436,11 +2133,11 @@ function openAddLink(sectionId, groupId) {
   const sec = sections.find(s => s.id===sectionId);
   const grp = sec && sec.groups.find(g => g.id===groupId);
   document.getElementById('addLinkGroupName').textContent = grp ? grp.name : '';
-  document.getElementById('addLinkForm').style.display  = 'flex';
-  document.getElementById('addGroupForm').style.display = 'none';
+  showForm('addLinkForm');
   document.getElementById('lName').value = '';
   document.getElementById('lUrl').value  = '';
   document.getElementById('lIcon').value = '';
+  document.getElementById('lOpen').value = 'new';
   updateIconPreview('');
   document.getElementById('lName').focus();
 }
@@ -1485,21 +2182,30 @@ function suggestIcon() {
 // CRUD
 function addSection() {
   const name = document.getElementById('sName').value.trim(); if (!name) { alert(t.alertAddSection); return; }
-  sections.push({ id:uid(), name, groups:[] });
+  if (renameTarget) {
+    const sec = sections.find(s => s.id===renameTarget.sectionId);
+    if (sec) sec.name = name;
+    renameTarget = null;
+  } else sections.push({ id:uid(), name, groups:[] });
   document.getElementById('sName').value='';
+  hideForms();
   save(); renderSections(); renderSectionModal();
 }
 function deleteSection(id) { sections = sections.filter(s => s.id!==id); save(); renderSections(); renderSectionModal(); }
-function moveSection(id, dir) {
-  const i = sections.findIndex(s => s.id===id); const ni=i+dir;
-  if (ni<0||ni>=sections.length) return;
-  [sections[i],sections[ni]]=[sections[ni],sections[i]]; save(); renderSections(); renderSectionModal();
-}
 function addGroup() {
-  const name = document.getElementById('gName').value.trim(); if (!name||!pendingSection) return;
+  const name = document.getElementById('gName').value.trim(); if (!name) return;
+  if (renameTarget) {
+    const sec = sections.find(s => s.id===renameTarget.sectionId);
+    const grp = sec && sec.groups.find(g => g.id===renameTarget.groupId);
+    if (grp) grp.name = name;
+    renameTarget = null; hideForms();
+    save(); renderSections(); renderSectionModal();
+    return;
+  }
+  if (!pendingSection) return;
   const sec = sections.find(s => s.id===pendingSection); if (!sec) return;
   sec.groups.push({ id:uid(), name, links:[] });
-  document.getElementById('addGroupForm').style.display='none';
+  hideForms();
   pendingSection=null;
   save(); renderSections(); renderSectionModal();
 }
@@ -1508,12 +2214,6 @@ function deleteGroup(sectionId, groupId) {
   sec.groups = sec.groups.filter(g => g.id!==groupId);
   save(); renderSections(); renderSectionModal();
 }
-function moveGroup(sectionId, groupId, dir) {
-  const sec = sections.find(s => s.id===sectionId); if (!sec) return;
-  const i=sec.groups.findIndex(g => g.id===groupId); const ni=i+dir;
-  if (ni<0||ni>=sec.groups.length) return;
-  [sec.groups[i],sec.groups[ni]]=[sec.groups[ni],sec.groups[i]]; save(); renderSections(); renderSectionModal();
-}
 function addLink() {
   const name = document.getElementById('lName').value.trim();
   const url  = document.getElementById('lUrl').value.trim();
@@ -1521,8 +2221,9 @@ function addLink() {
   if (!name||!url||!pendingGroup) return;
   const sec = sections.find(s => s.id===pendingGroup.sectionId); if (!sec) return;
   const grp = sec.groups.find(g => g.id===pendingGroup.groupId); if (!grp) return;
-  grp.links.push({ id:uid(), name, url, icon });
-  document.getElementById('addLinkForm').style.display='none'; pendingGroup=null;
+  const openIn = document.getElementById('lOpen').value;
+  grp.links.push({ id:uid(), name, url, icon, openIn });
+  hideForms(); pendingGroup=null;
   save(); renderSections(); renderSectionModal();
 }
 function deleteLink(sectionId, groupId, linkId) {
@@ -1531,48 +2232,220 @@ function deleteLink(sectionId, groupId, linkId) {
   grp.links = grp.links.filter(l => l.id!==linkId);
   save(); renderSections(); renderSectionModal();
 }
-function moveLink(sectionId, groupId, linkId, dir) {
-  const sec = sections.find(s => s.id===sectionId); if (!sec) return;
-  const grp = sec.groups.find(g => g.id===groupId); if (!grp) return;
-  const i=grp.links.findIndex(l => l.id===linkId); const ni=i+dir;
-  if (ni<0||ni>=grp.links.length) return;
-  [grp.links[i],grp.links[ni]]=[grp.links[ni],grp.links[i]]; save(); renderSections(); renderSectionModal();
+// Drag & drop reordering of sections, groups and links. The whole item follows the cursor,
+// the original collapses and an animated gap opens where it will land. Groups and links can
+// also move into another section/group.
+let dragState = null;   // {kind, ids, height}
+let dragGap = null;     // the placeholder element
+let lastDropped = null; // id of the item to flash after the re-render
+
+function dndId(kind, ids) { return ids[kind + 'Id']; }
+function removeDragGap() { if (dragGap) { dragGap.remove(); dragGap = null; } }
+function getDragGap() {
+  if (!dragGap) {
+    dragGap = document.createElement('div'); dragGap.className = 'drop-gap';
+    const lbl = document.createElement('span'); lbl.textContent = '↓ ' + t.dropHere;
+    dragGap.appendChild(lbl);
+  }
+  dragGap.style.setProperty('--gap-h', dragState.height + 'px');
+  return dragGap;
+}
+// Put the gap before a reference node (or at the end, above the add slot) unless it is already there
+function placeGap(list, before) {
+  const gap = getDragGap();
+  before = before || list.querySelector(':scope > .add-slot');
+  if (before === gap) return;
+  if (gap.parentNode === list && (before ? gap.nextSibling === before : !gap.nextSibling)) return;
+  list.insertBefore(gap, before || null);
+}
+function endDrag() {
+  document.body.classList.remove('dnd-active');
+  document.querySelectorAll('.dnd-item.dragging').forEach(r => { r.classList.remove('dragging'); r.style.height = ''; });
+  removeDragGap(); dragState = null;
+}
+
+function makeDraggable(el, kind, ids, handle) {
+  const id = dndId(kind, ids);
+  el.classList.add('dnd-item'); el.draggable = true;
+  el.dataset.kind = kind; el.dataset.dndId = id;
+  if (id === lastDropped) el.classList.add('just-dropped');
+
+  el.addEventListener('dragstart', e => {
+    e.stopPropagation(); // nested items: only the innermost one starts a drag
+    const hr = handle.getBoundingClientRect(), er = el.getBoundingClientRect();
+    dragState = { kind, ids, height: hr.height };
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', id); // Firefox needs data to start a drag
+    // Drag image: a solid, highlighted copy of the item's header row
+    const ghost = handle.cloneNode(true);
+    ghost.classList.add('drag-ghost');
+    ghost.style.width = hr.width + 'px';
+    document.body.appendChild(ghost);
+    const ox = Math.min(Math.max(e.clientX - hr.left, 0), hr.width);
+    const oy = Math.min(Math.max(e.clientY - hr.top, 0), hr.height);
+    e.dataTransfer.setDragImage(ghost, ox, oy);
+    setTimeout(() => ghost.remove(), 0);
+    // Collapse the original after the browser has taken its snapshot
+    el.style.height = er.height + 'px';
+    setTimeout(() => { el.classList.add('dragging'); document.body.classList.add('dnd-active'); }, 0);
+  });
+  el.addEventListener('dragend', endDrag);
+  el.addEventListener('dragover', e => {
+    if (!dragState || dragState.kind !== kind) return;
+    e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+    if (id === dndId(kind, dragState.ids)) return;
+    const r = el.getBoundingClientRect();
+    const after = e.clientY > r.top + r.height / 2;
+    placeGap(el.parentNode, after ? el.nextSibling : el);
+  });
+}
+
+function makeDropList(list, kind, ids, emptyText) {
+  list.dataset.listKind = kind;
+  if (ids.sectionId) list.dataset.sectionId = ids.sectionId;
+  if (ids.groupId)   list.dataset.groupId = ids.groupId;
+  if (ids.col)       list.dataset.col = ids.col;
+  if (emptyText) { // shown only while dragging, so an empty group/section can still receive items
+    const hint = document.createElement('div'); hint.className = 'dnd-empty-hint'; hint.textContent = emptyText;
+    list.appendChild(hint);
+  }
+  if (list._dndBound) return; // #sectionItemList persists between renders
+  list._dndBound = true;
+  list.addEventListener('dragover', e => {
+    if (!dragState || dragState.kind !== kind) return;
+    e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+    // Over empty space or the hint: open the gap at the end
+    if (!e.target.closest('.dnd-item[data-kind="' + kind + '"]') && !e.target.closest('.drop-gap')) placeGap(list, null);
+  });
+  list.addEventListener('drop', e => {
+    if (!dragState || dragState.kind !== kind) return;
+    e.preventDefault();
+    // Target position = whatever item follows the gap (ignoring the collapsed source)
+    const srcId = dndId(kind, dragState.ids);
+    let beforeId = null;
+    if (dragGap && dragGap.parentNode === list) {
+      for (let n = dragGap.nextSibling; n; n = n.nextSibling) {
+        if (n.dataset && n.dataset.kind === kind && n.dataset.dndId !== srcId) { beforeId = n.dataset.dndId; break; }
+      }
+    }
+    const from = dragState;
+    endDrag();
+    commitMove(from.kind, from.ids, { sectionId: list.dataset.sectionId, groupId: list.dataset.groupId, col: list.dataset.col }, beforeId);
+  });
+}
+
+// Remove the item from its old place and insert it before `beforeId` (or at the end) of the target list
+function insertBefore(arr, item, beforeId) {
+  const ti = beforeId ? arr.findIndex(x => x.id === beforeId) : -1;
+  if (ti < 0) arr.push(item); else arr.splice(ti, 0, item);
+}
+function commitMove(kind, from, to, beforeId) {
+  let moved = null;
+  if (kind === 'section') {
+    const i = sections.findIndex(x => x.id === from.sectionId); if (i < 0) return;
+    [moved] = sections.splice(i, 1);
+    insertBefore(sections, moved, beforeId);
+  } else if (kind === 'group') {
+    const src = sections.find(x => x.id === from.sectionId), dst = sections.find(x => x.id === to.sectionId);
+    if (!src || !dst) return;
+    const i = src.groups.findIndex(g => g.id === from.groupId); if (i < 0) return;
+    [moved] = src.groups.splice(i, 1);
+    insertBefore(dst.groups, moved, beforeId);
+  } else if (kind === 'widget') {
+    // Order is the array order; the column is just a property, so appending = last in its column
+    const i = widgets.findIndex(w => w.id === from.widgetId); if (i < 0) return;
+    [moved] = widgets.splice(i, 1);
+    moved.col = to.col;
+    insertBefore(widgets, moved, beforeId);
+    lastDropped = moved.id;
+    saveWidgets(); renderWidgetLayout(); renderWidgetsModal();
+    return;
+  } else if (kind === 'feed') {
+    const i = feeds.findIndex(f => f.id === from.feedId); if (i < 0) return;
+    [moved] = feeds.splice(i, 1);
+    insertBefore(feeds, moved, beforeId);
+    lastDropped = moved.id;
+    saveFeeds(); renderFeedModal(); renderFeedTabs();
+    return;
+  } else if (kind === 'market') {
+    const i = markets.findIndex(m => m.id === from.marketId); if (i < 0) return;
+    [moved] = markets.splice(i, 1);
+    insertBefore(markets, moved, beforeId);
+    lastDropped = moved.id;
+    saveMarkets(); renderMarketModal(); loadMarkets();
+    return;
+  } else if (kind === 'channel') {
+    const i = channels.findIndex(c => c.id === from.channelId); if (i < 0) return;
+    [moved] = channels.splice(i, 1);
+    insertBefore(channels, moved, beforeId);
+    lastDropped = moved.id;
+    saveChannels(); renderVideoChannelModal(); videoCache = {}; loadVideos();
+    return;
+  } else {
+    const src = sections.find(x => x.id === from.sectionId)?.groups.find(g => g.id === from.groupId);
+    const dst = sections.find(x => x.id === to.sectionId)?.groups.find(g => g.id === to.groupId);
+    if (!src || !dst) return;
+    const i = src.links.findIndex(l => l.id === from.linkId); if (i < 0) return;
+    [moved] = src.links.splice(i, 1);
+    insertBefore(dst.links, moved, beforeId);
+  }
+  lastDropped = moved.id;
+  save(); renderSections(); renderSectionModal();
 }
 
 // ── Feed modal ──
 function renderFeedModal() {
-  const list = document.getElementById('feedItemList'); list.innerHTML='';
-  if (!feeds.length) { setMsg(list, 'empty-state', t.noFeeds); return; }
-  feeds.forEach((f,i) => {
-    const card = document.createElement('div'); card.className='item-card';
-    const info = document.createElement('div'); info.className='item-card-info';
-    const nm = document.createElement('div'); nm.className='item-card-name'; nm.textContent=f.name;
-    const sb = document.createElement('div'); sb.className='item-card-sub'; sb.textContent=f.url;
+  const list = document.getElementById('feedItemList'); list.textContent = '';
+  makeDropList(list, 'feed', {});
+  if (!feeds.length) setMsg(list, 'empty-state', t.noFeeds);
+  feeds.forEach(f => {
+    const card = document.createElement('div'); card.className = 'item-card';
+    const info = document.createElement('div'); info.className = 'item-card-info';
+    const nm = document.createElement('div'); nm.className = 'item-card-name'; nm.textContent = f.name;
+    const sb = document.createElement('div'); sb.className = 'item-card-sub'; sb.textContent = f.url;
     info.appendChild(nm); info.appendChild(sb);
-    const badge = document.createElement('span'); badge.className='badge'; badge.textContent=f.count+'i';
-    const acts = document.createElement('div'); acts.className='item-card-actions';
-    if (i>0)            acts.appendChild(makeBtn('btn btn-ghost btn-sm','↑',() => moveFeed(f.id,-1)));
-    if (i<feeds.length-1) acts.appendChild(makeBtn('btn btn-ghost btn-sm','↓',() => moveFeed(f.id, 1)));
-    acts.appendChild(makeBtn('btn btn-danger btn-sm','×',() => deleteFeed(f.id)));
-    card.appendChild(info); card.appendChild(badge); card.appendChild(acts);
+    makeEditable(info, () => openEditFeed(f.id));
+    const badge = document.createElement('span'); badge.className = 'badge'; badge.textContent = f.count + 'i';
+    const acts = document.createElement('div'); acts.className = 'item-card-actions';
+    acts.appendChild(makeBtn('btn btn-danger btn-sm', '×', () => deleteFeed(f.id)));
+    card.appendChild(makeGrip()); card.appendChild(info); card.appendChild(badge); card.appendChild(acts);
+    makeDraggable(card, 'feed', { feedId: f.id }, card);
     list.appendChild(card);
   });
+  list.appendChild(makeAddSlot('channel', t.slotNewFeed, openAddFeed));
+  lastDropped = null;
+}
+function openAddFeed() {
+  renameTarget = null;
+  setFormTexts('addFeedForm', t.addFeed, t.add);
+  document.getElementById('fName').value = ''; document.getElementById('fUrl').value = ''; document.getElementById('fCount').value = '8';
+  document.getElementById('btnTogglePresets').style.display = '';
+  showForm('addFeedForm');
+  document.getElementById('fName').focus();
+}
+function openEditFeed(id) {
+  const f = feeds.find(x => x.id === id); if (!f) return;
+  renameTarget = { feedId: id };
+  setFormTexts('addFeedForm', t.editFeed, t.save);
+  document.getElementById('fName').value = f.name; document.getElementById('fUrl').value = f.url; document.getElementById('fCount').value = f.count;
+  document.getElementById('btnTogglePresets').style.display = 'none';
+  showForm('addFeedForm');
+  document.getElementById('fName').focus();
 }
 function addFeed() {
   const name  = document.getElementById('fName').value.trim();
   const url   = document.getElementById('fUrl').value.trim();
   const count = parseInt(document.getElementById('fCount').value)||8;
   if (!name||!url) { alert(t.alertAddFeed); return; }
-  feeds.push({id:uid(),name,url,count}); saveFeeds();
-  document.getElementById('fName').value=''; document.getElementById('fUrl').value=''; document.getElementById('fCount').value='8';
-  renderFeedModal(); renderFeedTabs();
+  const editingId = renameTarget && renameTarget.feedId;
+  if (editingId) {
+    const f = feeds.find(x => x.id === editingId);
+    if (f) { f.name = name; f.url = url; f.count = count; delete feedCache[f.id]; }
+  } else feeds.push({id:uid(),name,url,count});
+  hideForms();
+  saveFeeds(); renderFeedModal(); renderFeedTabs();
 }
 function deleteFeed(id) { feeds=feeds.filter(f=>f.id!==id); delete feedCache[id]; saveFeeds(); renderFeedModal(); renderFeedTabs(); }
-function moveFeed(id, dir) {
-  const i=feeds.findIndex(f=>f.id===id); const ni=i+dir;
-  if (ni<0||ni>=feeds.length) return;
-  [feeds[i],feeds[ni]]=[feeds[ni],feeds[i]]; saveFeeds(); renderFeedModal(); renderFeedTabs();
-}
 function togglePresets() {
   const panel=document.getElementById('presetPanel');
   const open = panel.style.display!=='none'; panel.style.display=open?'none':'flex';
@@ -1692,7 +2565,7 @@ function renderWallSource() {
 }
 
 // Bing daily wallpaper via bing.biturl.top (returns the day's image URL).
-function bingMkt() { return currentLang === 'es' ? 'es-ES' : currentLang === 'ru' ? 'ru-RU' : 'en-US'; }
+function bingMkt() { return { es:'es-ES', ru:'ru-RU', fr:'fr-FR', de:'de-DE' }[currentLang] || 'en-US'; }
 async function fetchBingWallpaper(fromButton) {
   const note = document.getElementById('bingCopyright');
   if (fromButton && note) { note.textContent = t.loading; }
@@ -1806,21 +2679,42 @@ function renderMarkets(data) {
 
 // Markets modal
 function renderMarketModal() {
-  const list = document.getElementById('marketItemList'); list.innerHTML = '';
-  if (!markets.length) { setMsg(list, 'empty-state', t.noAssets); return; }
-  markets.forEach((m, i) => {
+  const list = document.getElementById('marketItemList'); list.textContent = '';
+  makeDropList(list, 'market', {});
+  if (!markets.length) setMsg(list, 'empty-state', t.noAssets);
+  markets.forEach(m => {
     const card = document.createElement('div'); card.className = 'item-card';
     const info = document.createElement('div'); info.className = 'item-card-info';
     const nm = document.createElement('div'); nm.className = 'item-card-name'; nm.textContent = m.symbol.toUpperCase() + ' · ' + m.name;
     const sb = document.createElement('div'); sb.className = 'item-card-sub';   sb.textContent = m.id;
     info.appendChild(nm); info.appendChild(sb);
+    makeEditable(info, () => openEditMarket(m.id));
     const acts = document.createElement('div'); acts.className = 'item-card-actions';
-    if (i > 0)             acts.appendChild(makeBtn('btn btn-ghost btn-sm', '↑', () => moveMarket(m.id, -1)));
-    if (i < markets.length-1) acts.appendChild(makeBtn('btn btn-ghost btn-sm', '↓', () => moveMarket(m.id,  1)));
     acts.appendChild(makeBtn('btn btn-danger btn-sm', '×', () => deleteMarket(m.id)));
-    card.appendChild(info); card.appendChild(acts);
+    card.appendChild(makeGrip()); card.appendChild(info); card.appendChild(acts);
+    makeDraggable(card, 'market', { marketId: m.id }, card);
     list.appendChild(card);
   });
+  list.appendChild(makeAddSlot('channel', t.slotNewAsset, openAddMarket));
+  lastDropped = null;
+}
+
+function openAddMarket() {
+  renameTarget = null;
+  setFormTexts('addMarketForm', t.addAsset, t.add);
+  document.getElementById('mCoinId').value = ''; document.getElementById('mSymbol').value = ''; document.getElementById('mName').value = '';
+  document.getElementById('btnMarketPresets').style.display = '';
+  showForm('addMarketForm');
+  document.getElementById('mCoinId').focus();
+}
+function openEditMarket(id) {
+  const m = markets.find(x => x.id === id); if (!m) return;
+  renameTarget = { marketId: id };
+  setFormTexts('addMarketForm', t.editAsset, t.save);
+  document.getElementById('mCoinId').value = m.id; document.getElementById('mSymbol').value = m.symbol; document.getElementById('mName').value = m.name;
+  document.getElementById('btnMarketPresets').style.display = 'none';
+  showForm('addMarketForm');
+  document.getElementById('mSymbol').focus();
 }
 
 function addMarket() {
@@ -1828,23 +2722,18 @@ function addMarket() {
   const symbol = document.getElementById('mSymbol').value.trim();
   const name   = document.getElementById('mName').value.trim();
   if (!id || !symbol) { alert(t.alertFillFields); return; }
-  if (markets.find(m => m.id === id)) { alert(t.alertAssetExists); return; }
-  markets.push({ id, symbol, name: name || symbol.toUpperCase() });
-  document.getElementById('mCoinId').value = '';
-  document.getElementById('mSymbol').value = '';
-  document.getElementById('mName').value   = '';
+  const editingId = renameTarget && renameTarget.marketId;
+  if (markets.find(m => m.id === id && m.id !== editingId)) { alert(t.alertAssetExists); return; }
+  if (editingId) {
+    const m = markets.find(x => x.id === editingId);
+    if (m) { m.id = id; m.symbol = symbol; m.name = name || symbol.toUpperCase(); }
+  } else markets.push({ id, symbol, name: name || symbol.toUpperCase() });
+  hideForms();
   saveMarkets(); renderMarketModal(); loadMarkets();
 }
 
 function deleteMarket(id) {
   markets = markets.filter(m => m.id !== id);
-  saveMarkets(); renderMarketModal(); loadMarkets();
-}
-
-function moveMarket(id, dir) {
-  const i = markets.findIndex(m => m.id === id); const ni = i + dir;
-  if (ni < 0 || ni >= markets.length) return;
-  [markets[i], markets[ni]] = [markets[ni], markets[i]];
   saveMarkets(); renderMarketModal(); loadMarkets();
 }
 
@@ -1860,7 +2749,7 @@ function toggleMarketPresets() {
       b.addEventListener('click', () => {
         markets.push({ ...p });
         saveMarkets(); renderMarketModal(); loadMarkets();
-        panel.style.display = 'none';
+        hideForms();
       });
       grid.appendChild(b);
     });
@@ -2206,33 +3095,58 @@ function renderAllVideos(items, container) {
 
 // Videos modal
 function renderVideoChannelModal() {
-  const list = document.getElementById('videoChannelList'); list.innerHTML='';
-  if (!channels.length) { setMsg(list, 'empty-state', t.noChannels); return; }
-  channels.forEach((ch, i) => {
-    const card = document.createElement('div'); card.className='item-card';
-    const info = document.createElement('div'); info.className='item-card-info';
-    const nm = document.createElement('div'); nm.className='item-card-name'; nm.textContent=ch.name;
-    const sb = document.createElement('div'); sb.className='item-card-sub'; sb.textContent='ID: '+ch.id+' · '+ch.count+' vídeos';
+  const list = document.getElementById('videoChannelList'); list.textContent = '';
+  makeDropList(list, 'channel', {});
+  if (!channels.length) setMsg(list, 'empty-state', t.noChannels);
+  channels.forEach(ch => {
+    const card = document.createElement('div'); card.className = 'item-card';
+    const info = document.createElement('div'); info.className = 'item-card-info';
+    const nm = document.createElement('div'); nm.className = 'item-card-name'; nm.textContent = ch.name;
+    const sb = document.createElement('div'); sb.className = 'item-card-sub'; sb.textContent = 'ID: ' + ch.id + ' · ' + ch.count + ' ' + t.videosWord;
     info.appendChild(nm); info.appendChild(sb);
-    const acts = document.createElement('div'); acts.className='item-card-actions';
-    if (i>0)             acts.appendChild(makeBtn('btn btn-ghost btn-sm','↑',()=>moveChannel(ch.id,-1)));
-    if (i<channels.length-1) acts.appendChild(makeBtn('btn btn-ghost btn-sm','↓',()=>moveChannel(ch.id, 1)));
-    acts.appendChild(makeBtn('btn btn-danger btn-sm','×',()=>deleteChannel(ch.id)));
-    card.appendChild(info); card.appendChild(acts);
+    makeEditable(info, () => openEditChannel(ch.id));
+    const acts = document.createElement('div'); acts.className = 'item-card-actions';
+    acts.appendChild(makeBtn('btn btn-danger btn-sm', '×', () => deleteChannel(ch.id)));
+    card.appendChild(makeGrip()); card.appendChild(info); card.appendChild(acts);
+    makeDraggable(card, 'channel', { channelId: ch.id }, card);
     list.appendChild(card);
   });
+  list.appendChild(makeAddSlot('channel', t.slotNewChannel, openAddChannel));
+  lastDropped = null;
+}
+
+function openAddChannel() {
+  renameTarget = null;
+  setFormTexts('addChannelForm', t.addChannel, t.addChannel);
+  document.getElementById('vChannelId').value = '';
+  document.getElementById('vChannelName').value = '';
+  document.getElementById('vCount').value = '5';
+  showForm('addChannelForm');
+  document.getElementById('vChannelId').focus();
+}
+function openEditChannel(id) {
+  const ch = channels.find(c => c.id === id); if (!ch) return;
+  renameTarget = { channelId: id };
+  setFormTexts('addChannelForm', t.editChannel, t.save);
+  document.getElementById('vChannelId').value = ch.id;
+  document.getElementById('vChannelName').value = ch.name;
+  document.getElementById('vCount').value = ch.count;
+  showForm('addChannelForm');
+  document.getElementById('vChannelName').focus();
 }
 
 function addChannel() {
   const id    = document.getElementById('vChannelId').value.trim();
-  const name  = document.getElementById('vChannelName').value.trim() || 'Canal';
+  const name  = document.getElementById('vChannelName').value.trim() || t.channelDefaultName;
   const count = parseInt(document.getElementById('vCount').value) || 5;
   if (!id) { alert(t.alertFillChannel); return; }
-  if (channels.find(c => c.id===id)) { alert(t.alertChannelExists); return; }
-  channels.push({ id, name, count });
-  document.getElementById('vChannelId').value='';
-  document.getElementById('vChannelName').value='';
-  document.getElementById('vCount').value='5';
+  const editingId = renameTarget && renameTarget.channelId;
+  if (channels.find(c => c.id===id && c.id!==editingId)) { alert(t.alertChannelExists); return; }
+  if (editingId) {
+    const ch = channels.find(c => c.id===editingId);
+    if (ch) { delete videoCache[ch.id]; ch.id = id; ch.name = name; ch.count = count; }
+  } else channels.push({ id, name, count });
+  hideForms();
   saveChannels(); renderVideoChannelModal();
   videoCache = {}; loadVideos();
 }
@@ -2242,12 +3156,6 @@ function deleteChannel(id) {
   saveChannels(); renderVideoChannelModal(); loadVideos();
 }
 
-function moveChannel(id, dir) {
-  const i=channels.findIndex(c=>c.id===id); const ni=i+dir;
-  if (ni<0||ni>=channels.length) return;
-  [channels[i],channels[ni]]=[channels[ni],channels[i]];
-  saveChannels(); renderVideoChannelModal(); videoCache={}; loadVideos();
-}
 
 
 // ════════════════════════════════════════════════
@@ -2405,12 +3313,12 @@ function applyFontSize(size, save=true) {
 //  THEMES
 // ════════════════════════════════════════════════
 const THEMES = [
-  { id:'obsidian',  name:'Obsidian',      desc_es:'Oscuro neutro · acento dorado',  desc_en:'Dark neutral · golden accent',   accent:'#c8b89a', bg:'#0a0a0c' },
-  { id:'midnight',  name:'Midnight Blue', desc_es:'Azul profundo · acento celeste',  desc_en:'Deep blue · sky accent',         accent:'#7eb8e8', bg:'#050c16' },
-  { id:'forest',    name:'Forest',        desc_es:'Verde oscuro · acento esmeralda', desc_en:'Dark green · emerald accent',    accent:'#6dbf8a', bg:'#08100c' },
-  { id:'aurora',    name:'Aurora',        desc_es:'Violeta oscuro · acento lavanda', desc_en:'Dark violet · lavender accent',  accent:'#c48de0', bg:'#100812' },
-  { id:'ember',     name:'Ember',         desc_es:'Marrón cálido · acento ámbar',   desc_en:'Warm brown · amber accent',      accent:'#e89a6a', bg:'#120a06' },
-  { id:'arctic',    name:'Arctic',        desc_es:'Azul glacial · acento cian',      desc_en:'Glacial blue · cyan accent',     accent:'#6ab8c8', bg:'#060e12' },
+  { id:'obsidian',  name:'Obsidian',      desc_es:'Oscuro neutro · acento dorado',  desc_en:'Dark neutral · golden accent',   desc_fr:'Gris foncé neutre · accent doré', desc_de:'Neutrales Dunkelgrau · goldener Akzent', accent:'#c8b89a', bg:'#0a0a0c' },
+  { id:'midnight',  name:'Midnight Blue', desc_es:'Azul profundo · acento celeste',  desc_en:'Deep blue · sky accent',         desc_fr:'Bleu profond · accent ciel', desc_de:'Tiefblau · himmelblauer Akzent', accent:'#7eb8e8', bg:'#050c16' },
+  { id:'forest',    name:'Forest',        desc_es:'Verde oscuro · acento esmeralda', desc_en:'Dark green · emerald accent',    desc_fr:'Vert foncé · accent émeraude', desc_de:'Dunkelgrün · smaragdgrüner Akzent', accent:'#6dbf8a', bg:'#08100c' },
+  { id:'aurora',    name:'Aurora',        desc_es:'Violeta oscuro · acento lavanda', desc_en:'Dark violet · lavender accent',  desc_fr:'Violet foncé · accent lavande', desc_de:'Dunkelviolett · lavendelfarbener Akzent', accent:'#c48de0', bg:'#100812' },
+  { id:'ember',     name:'Ember',         desc_es:'Marrón cálido · acento ámbar',   desc_en:'Warm brown · amber accent',      desc_fr:'Brun chaud · accent ambre', desc_de:'Warmes Braun · bernsteinfarbener Akzent', accent:'#e89a6a', bg:'#120a06' },
+  { id:'arctic',    name:'Arctic',        desc_es:'Azul glacial · acento cian',      desc_en:'Glacial blue · cyan accent',     desc_fr:'Bleu glacial · accent cyan', desc_de:'Gletscherblau · cyanfarbener Akzent', accent:'#6ab8c8', bg:'#060e12' },
 ];
 
 let currentTheme = 'obsidian';
@@ -2442,7 +3350,7 @@ function renderThemeModal() {
     const nm = document.createElement('div'); nm.style.cssText = 'font-size:13px;color:var(--text-primary);';
     nm.textContent = th.name;
     const ds = document.createElement('div'); ds.style.cssText = 'font-size:10.5px;color:var(--text-muted);margin-top:2px;';
-    ds.textContent = currentLang === 'es' ? th.desc_es : th.desc_en;
+    ds.textContent = th['desc_' + currentLang] || th.desc_en;
     info.appendChild(nm); info.appendChild(ds);
 
     // Check
@@ -3090,16 +3998,15 @@ function openEditLink(sectionId, groupId, linkId) {
   document.getElementById('elName').value = lnk.name;
   document.getElementById('elUrl').value  = lnk.url;
   document.getElementById('elIcon').value = lnk.icon || '';
+  document.getElementById('elOpen').value = linkOpenMode(lnk);
   updateEditIconPreview(lnk.icon || '');
-  document.getElementById('addLinkForm').style.display  = 'none';
-  document.getElementById('addGroupForm').style.display = 'none';
-  document.getElementById('editLinkForm').style.display = 'flex';
+  showForm('editLinkForm');
   document.getElementById('elName').focus();
 }
 
 function closeEditLink() {
   editLinkTarget = null;
-  document.getElementById('editLinkForm').style.display = 'none';
+  hideForms();
   document.getElementById('elName').value = '';
   document.getElementById('elUrl').value  = '';
   document.getElementById('elIcon').value = '';
@@ -3117,6 +4024,7 @@ function saveEditLink() {
   const lnk = grp?.links.find(l => l.id === editLinkTarget.linkId);
   if (!lnk) return;
   lnk.name = name; lnk.url = url; lnk.icon = icon;
+  lnk.openIn = document.getElementById('elOpen').value; delete lnk.sameTab;
   save(); closeEditLink(); renderSections(); renderSectionModal();
 }
 
@@ -3139,7 +4047,7 @@ function updateEditIconPreview(url) {
 // ════════════════════════════════════════════════
 // Fallback only for when the page is opened outside the extension context
 // (e.g. dashboard.html served as a plain file). The real source of truth is manifest.json.
-const APP_VERSION_FALLBACK = '1.11.2';
+const APP_VERSION_FALLBACK = '1.12.0';
 
 function getAppVersion() {
   try {
@@ -3151,18 +4059,30 @@ function getAppVersion() {
 
 // What's-new list shown in the About tab. Newest first; items translated per language.
 const CHANGELOG = [
+  { v: '1.12.0',
+    es: ['Configuración rediseñada: menú por grupos, descripción en cada panel y diálogos aparte para añadir y editar', 'Arrastrar y soltar para ordenar links, secciones, grupos, vídeos, feeds, mercados y widgets (en dos columnas, izquierda y derecha)', 'Cada link se abre en pestaña nueva, pestaña actual o ventana nueva', 'Nuevos idiomas: francés y alemán', 'Modal de bienvenida en el primer uso y nuevo logo'],
+    en: ['Redesigned settings: grouped menu, a description on each panel and separate dialogs to add and edit', 'Drag & drop to reorder links, sections, groups, videos, feeds, markets and widgets (in two columns, left and right)', 'Each link opens in a new tab, the current tab or a new window', 'New languages: French and German', 'Welcome dialog on first use and a new logo'],
+    ru: ['Новый дизайн настроек: меню по группам, описание на каждой панели и отдельные окна для добавления и изменения', 'Перетаскивание для изменения порядка ссылок, разделов, групп, видео, лент, рынков и виджетов (в двух колонках: слева и справа)', 'Каждая ссылка открывается в новой вкладке, текущей вкладке или новом окне', 'Новые языки: французский и немецкий', 'Окно приветствия при первом запуске и новый логотип'],
+    fr: ['Paramètres repensés : menu par groupes, description sur chaque panneau et boîtes de dialogue séparées pour ajouter et modifier', 'Glisser-déposer pour réorganiser les liens, sections, groupes, vidéos, flux, marchés et widgets (sur deux colonnes, gauche et droite)', 'Chaque lien s\'ouvre dans un nouvel onglet, l\'onglet actuel ou une nouvelle fenêtre', 'Nouvelles langues : français et allemand', 'Fenêtre de bienvenue à la première utilisation et nouveau logo'],
+    de: ['Neu gestaltete Einstellungen: gruppiertes Menü, Beschreibung auf jedem Panel und eigene Dialoge zum Hinzufügen und Bearbeiten', 'Drag & Drop zum Umsortieren von Links, Abschnitten, Gruppen, Videos, Feeds, Märkten und Widgets (in zwei Spalten, links und rechts)', 'Jeder Link öffnet sich in einem neuen Tab, im aktuellen Tab oder in einem neuen Fenster', 'Neue Sprachen: Französisch und Deutsch', 'Willkommensdialog bei der ersten Nutzung und neues Logo'] },
   { v: '1.11.0',
     es: ['Selector de tipo de fondo: URL, Bing Daily, Wallhaven y gradientes', 'Fondo de Bing diario por defecto'],
     en: ['Background type selector: URL, Bing Daily, Wallhaven and gradients', 'Bing daily wallpaper by default'],
-    ru: ['Выбор типа фона: URL, Bing Daily, Wallhaven и градиенты', 'Ежедневные обои Bing по умолчанию'] },
+    ru: ['Выбор типа фона: URL, Bing Daily, Wallhaven и градиенты', 'Ежедневные обои Bing по умолчанию'],
+    fr: ["Sélecteur du type d'arrière-plan : URL, Bing Daily, Wallhaven et dégradés", "Fond d'écran Bing du jour par défaut"],
+    de: ['Auswahl des Hintergrundtyps: URL, Bing Daily, Wallhaven und Farbverläufe', 'Bing-Hintergrund des Tages als Standard'] },
   { v: '1.10.0',
     es: ['Widgets de homelab: Proxmox, Docker (Portainer) y Pi-hole', 'Nombre de servidor y formato compacto en Uptime Kuma'],
     en: ['Homelab widgets: Proxmox, Docker (Portainer) and Pi-hole', 'Server name and compact layout for Uptime Kuma'],
-    ru: ['Виджеты homelab: Proxmox, Docker (Portainer) и Pi-hole', 'Имя сервера и компактный вид Uptime Kuma'] },
+    ru: ['Виджеты homelab: Proxmox, Docker (Portainer) и Pi-hole', 'Имя сервера и компактный вид Uptime Kuma'],
+    fr: ['Widgets homelab : Proxmox, Docker (Portainer) et Pi-hole', "Nom du serveur et affichage compact pour Uptime Kuma"],
+    de: ['Homelab-Widgets: Proxmox, Docker (Portainer) und Pi-hole', 'Servername und kompaktes Layout für Uptime Kuma'] },
   { v: '1.9.0',
     es: ['Gestor de widgets: activar, desactivar, mover entre barras y reordenar'],
     en: ['Widget manager: enable, disable, move between bars and reorder'],
-    ru: ['Менеджер виджетов: включение, отключение, перемещение и порядок'] },
+    ru: ['Менеджер виджетов: включение, отключение, перемещение и порядок'],
+    fr: ['Gestionnaire de widgets : activer, désactiver, déplacer entre les barres et réorganiser'],
+    de: ['Widget-Manager: aktivieren, deaktivieren, zwischen den Leisten verschieben und umsortieren'] },
 ];
 
 function renderAbout() {
@@ -3174,7 +4094,7 @@ function renderAbout() {
   const cl = document.getElementById('aboutChangelog');
   if (cl) {
     cl.innerHTML = '';
-    const lang = ['es', 'en', 'ru'].includes(currentLang) ? currentLang : 'en';
+    const lang = LANGUAGES[currentLang] ? currentLang : 'en';
     CHANGELOG.forEach(entry => {
       const items = entry[lang] || entry.en || [];
       if (!items.length) return;
@@ -3197,7 +4117,8 @@ notepad.addEventListener('input',()=>{ clearTimeout(_noteTimer); _noteTimer=setT
 //  KEYBOARD
 // ════════════════════════════════════════════════
 document.addEventListener('keydown', e => {
-  if (e.key==='Escape') closeModal();
+  if (e.key==='Escape' && document.getElementById('welcomeOverlay').classList.contains('open')) { closeWelcome(false); return; }
+  if (e.key==='Escape') { if (document.getElementById('formOverlay').classList.contains('open')) hideForms(); else closeModal(); }
   if (e.key==='/'&&!['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) { e.preventDefault(); document.getElementById('searchInput').focus(); }
 });
 
@@ -3213,6 +4134,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('modalOverlay').addEventListener('click', e=>{ if(e.target.id==='modalOverlay')closeModal(); });
   document.getElementById('modalClose').addEventListener('click', closeModal);
   document.getElementById('btnModalFooterClose').addEventListener('click', closeModal);
+  document.getElementById('btnWelcomeStart').addEventListener('click', () => closeWelcome(false));
+  document.getElementById('btnWelcomeSettings').addEventListener('click', () => closeWelcome(true));
   document.getElementById('btnExport').addEventListener('click', exportConfig);
   document.getElementById('btnImport').addEventListener('click', () => document.getElementById('importFileInput').click());
   document.getElementById('importFileInput').addEventListener('change', e => { importConfig(e.target.files[0]); e.target.value=''; });
@@ -3220,13 +4143,20 @@ document.addEventListener('DOMContentLoaded', () => {
   // Links tab
   document.getElementById('btnAddSection').addEventListener('click', addSection);
   document.getElementById('btnAddGroup').addEventListener('click', addGroup);
-  document.getElementById('btnCancelGroup').addEventListener('click', ()=>{ document.getElementById('addGroupForm').style.display='none'; pendingSection=null; });
+  document.getElementById('btnCancelGroup').addEventListener('click', ()=>{ hideForms(); pendingSection=null; });
   document.getElementById('btnAddLink').addEventListener('click', addLink);
   // Icon picker live preview
   document.getElementById('lName').addEventListener('input', () => { clearTimeout(_iconDebounce); _iconDebounce = setTimeout(suggestIcon, 350); });
   document.getElementById('lUrl').addEventListener('input',  () => { clearTimeout(_iconDebounce); _iconDebounce = setTimeout(suggestIcon, 350); });
   document.getElementById('lIcon').addEventListener('input', e => updateIconPreview(e.target.value.trim()));
-  document.getElementById('btnCloseAddLink').addEventListener('click', ()=>{ document.getElementById('addLinkForm').style.display='none'; pendingGroup=null; });
+  document.getElementById('btnCloseAddLink').addEventListener('click', ()=>{ hideForms(); pendingGroup=null; });
+  document.getElementById('btnCancelSection').addEventListener('click', hideForms);
+  document.getElementById('formOverlay').addEventListener('click', e=>{ if(e.target.id==='formOverlay') hideForms(); });
+  document.getElementById('formOverlay').addEventListener('keydown', e=>{
+    if (e.key!=='Enter' || e.target.tagName!=='INPUT') return;
+    const form = e.target.closest('.add-form'); const ok = form && form.querySelector('.btn-primary');
+    if (ok) { e.preventDefault(); ok.click(); }
+  });
   document.getElementById('btnSaveEditLink').addEventListener('click', saveEditLink);
   document.getElementById('btnCloseEditLink').addEventListener('click', closeEditLink);
   document.getElementById('elIcon').addEventListener('input', e => updateEditIconPreview(e.target.value.trim()));
@@ -3241,6 +4171,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Feeds tab
   document.getElementById('btnAddFeed').addEventListener('click', addFeed);
   document.getElementById('btnTogglePresets').addEventListener('click', togglePresets);
+  document.getElementById('btnCancelFeed').addEventListener('click', hideForms);
+  document.getElementById('btnCancelMarket').addEventListener('click', hideForms);
   // Calendar
   document.getElementById('calPrev').addEventListener('click', () => {
     calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCalendar();
@@ -3252,6 +4184,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnManageVideos').addEventListener('click',  ()=>openModal('videos'));
   document.getElementById('btnRefreshVideos').addEventListener('click', ()=>{ videoCache={}; loadVideos(true); });
   document.getElementById('btnAddChannel').addEventListener('click', addChannel);
+  document.getElementById('btnCancelChannel').addEventListener('click', hideForms);
   // Markets tab
   document.getElementById('btnManageUptime').addEventListener('click', () => openModal('uptime'));
   document.getElementById('btnRefreshUptime').addEventListener('click', () => loadUptime(true));
@@ -3363,4 +4296,17 @@ async function init() {
     else { badge.textContent=t.syncLocalMsg; badge.style.color='var(--text-muted)'; badge.style.opacity='1'; }
   }
 }
-init();
+// First run: a short welcome explaining the add-on. Anyone who already has saved settings
+// (e.g. an existing user after an update, or a synced browser) never sees it.
+async function maybeShowWelcome() {
+  if (await Store.get('gd_welcomed', false)) return;
+  const hasConfig = await Store.get('gd_sections', null) !== null || await Store.get('gd_lang', null) !== null;
+  if (hasConfig) { await Store.set('gd_welcomed', true); return; }
+  document.getElementById('welcomeOverlay').classList.add('open');
+}
+async function closeWelcome(openSettings) {
+  document.getElementById('welcomeOverlay').classList.remove('open');
+  await Store.set('gd_welcomed', true);
+  if (openSettings) openModal('links');
+}
+init().then(maybeShowWelcome);

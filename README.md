@@ -42,7 +42,7 @@ El dashboard se divide en tres columnas:
 - **Widgets configurables** — Activa, desactiva, mueve entre barras y reordena los widgets del panel (reloj, feeds, clima, calendario, mercados, notas, Uptime Kuma, Proxmox, Docker, Pi-hole)
 - **Monitorización de tu homelab** — Estado de VMs de Proxmox, contenedores Docker (vía Portainer) y estadísticas de Pi-hole, con uso de CPU y RAM. Las credenciales solo se envían a tus propios servidores
 - **Import / Export** — Guarda y restaura toda tu configuración en un JSON
-- **Multiidioma** — Interfaz en Español, Inglés y Ruso
+- **Multiidioma** — Interfaz en Español, Inglés, Ruso, Francés y Alemán
 - **Sin dependencias** — Vanilla JS, sin frameworks ni bundler
 
 ---
