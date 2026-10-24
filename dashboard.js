@@ -58,6 +58,7 @@ if (USE_SYNC) {
     if (changes.gd_uptime)   { uptimeConfig = changes.gd_uptime.newValue; loadUptime(); }
     if (changes.gd_proxmox)  { proxmoxConfig = changes.gd_proxmox.newValue; loadProxmox(); }
     if (changes.gd_docker)   { dockerConfig = changes.gd_docker.newValue; loadDocker(); }
+    if (changes.gd_weather)  { weatherConfig = changes.gd_weather.newValue; loadWeather(); renderWeatherModal(); }
     if (changes.gd_pihole)   { piholeConfig = changes.gd_pihole.newValue; piholeSid = null; loadPihole(); }
     if (changes.gd_widgets)  { widgets = normalizeWidgets(changes.gd_widgets.newValue); renderWidgetLayout(); renderModalNav(); renderWidgetsModal(); }
     showSyncBadge('synced');
@@ -135,6 +136,7 @@ const MARKET_PRESETS = [
 const DEFAULT_CHANNELS = [];
 let channels  = DEFAULT_CHANNELS;
 let uptimeConfig = { url: '', slug: 'default' }; // Uptime Kuma
+let weatherConfig = { name: 'Valencia', lat: 39.47, lon: -0.37 }; // weather location (changed from Settings → Weather)
 let proxmoxConfig = { url: '', tokenId: '', tokenSecret: '', name: '', selected: [] }; // Proxmox VE (selected = vmids to detail)
 let proxmoxVms = []; // last fetched guest list, for the config selection UI
 let dockerConfig  = { url: '', apiKey: '', endpointId: '', name: '' };   // Portainer (endpointId auto-detected if empty)
@@ -162,7 +164,7 @@ const WIDGETS = [
   { id:'proxmox',  i18n:'proxmoxWidget', configTab:'proxmox' },
   { id:'docker',   i18n:'dockerWidget',  configTab:'docker' },
   { id:'pihole',   i18n:'piholeWidget',  configTab:'pihole' },
-  { id:'weather',  i18n:'weather',       configTab:null },
+  { id:'weather',  i18n:'weather',       configTab:'weather' },
   { id:'calendar', i18n:'calendar',      configTab:null },
   { id:'markets',  i18n:'markets',       configTab:'markets' },
   { id:'note',     i18n:'quickNote',     configTab:null },
@@ -287,7 +289,7 @@ const LANGUAGES = {
     createGroup:    'Crear grupo',
     addLinkTo:      'Añadir link en:',
     addLink:        'Añadir link',
-    linkOpenLabel:  'Abrir en', linkOpenNew: 'Pestaña nueva', linkOpenSame: 'Pestaña actual', editSection: 'Editar sección', dragToReorder: 'Arrastra para reordenar', dropHere: 'Soltar aquí', dropLinksHere: 'Arrastra un link aquí', dropGroupsHere: 'Arrastra un grupo aquí', slotNewSection: 'Nueva sección', slotNewGroup: 'Nuevo grupo', slotNewLink: 'Nuevo link', slotNewFeed: 'Nuevo feed', slotNewAsset: 'Nuevo activo', editFeed: 'Editar feed', editAsset: 'Editar activo', dropWidgetsHere: 'Arrastra un widget aquí', slotNewChannel: 'Nuevo canal', editChannel: 'Editar canal', videosWord: 'vídeos', channelDefaultName: 'Canal', clickToEdit: 'Haz clic para editar', editGroup: 'Editar grupo', linkOpenWindow: 'Ventana nueva',
+    linkOpenLabel:  'Abrir en', linkOpenNew: 'Pestaña nueva', linkOpenSame: 'Pestaña actual', editSection: 'Editar sección', dragToReorder: 'Arrastra para reordenar', dropHere: 'Soltar aquí', dropLinksHere: 'Arrastra un link aquí', dropGroupsHere: 'Arrastra un grupo aquí', slotNewSection: 'Nueva sección', slotNewGroup: 'Nuevo grupo', slotNewLink: 'Nuevo link', slotNewFeed: 'Nuevo feed', slotNewAsset: 'Nuevo activo', editFeed: 'Editar feed', editAsset: 'Editar activo', dropWidgetsHere: 'Arrastra un widget aquí', desc_weather: 'Elige la ciudad para la que quieres ver el tiempo.', weatherHint: 'Busca tu ciudad y haz clic en un resultado para usarla. El tiempo viene de Open-Meteo, sin clave de API.', weatherCurrent: 'Ubicación actual', weatherSearchLabel: 'Buscar ciudad', weatherSearchPh: 'Madrid, Berlín, Lima…', weatherNoResults: 'Sin resultados. Prueba con otro nombre.', weatherSearchError: 'No se pudo buscar la ciudad. Inténtalo de nuevo.', weatherSaved: '✓ Ubicación actualizada', weatherUse: 'Usar esta ubicación', slotNewChannel: 'Nuevo canal', editChannel: 'Editar canal', videosWord: 'vídeos', channelDefaultName: 'Canal', clickToEdit: 'Haz clic para editar', editGroup: 'Editar grupo', linkOpenWindow: 'Ventana nueva',
     general: 'General',
     appearanceTab: 'Tema y texto',
     grpContent: 'Mi página',
@@ -558,7 +560,7 @@ const LANGUAGES = {
     createGroup:    'Create group',
     addLinkTo:      'Add link to:',
     addLink:        'Add link',
-    linkOpenLabel:  'Open in', linkOpenNew: 'New tab', linkOpenSame: 'Current tab', editSection: 'Edit section', dragToReorder: 'Drag to reorder', dropHere: 'Drop here', dropLinksHere: 'Drag a link here', dropGroupsHere: 'Drag a group here', slotNewSection: 'New section', slotNewGroup: 'New group', slotNewLink: 'New link', slotNewFeed: 'New feed', slotNewAsset: 'New asset', editFeed: 'Edit feed', editAsset: 'Edit asset', dropWidgetsHere: 'Drag a widget here', slotNewChannel: 'New channel', editChannel: 'Edit channel', videosWord: 'videos', channelDefaultName: 'Channel', clickToEdit: 'Click to edit', editGroup: 'Edit group', linkOpenWindow: 'New window',
+    linkOpenLabel:  'Open in', linkOpenNew: 'New tab', linkOpenSame: 'Current tab', editSection: 'Edit section', dragToReorder: 'Drag to reorder', dropHere: 'Drop here', dropLinksHere: 'Drag a link here', dropGroupsHere: 'Drag a group here', slotNewSection: 'New section', slotNewGroup: 'New group', slotNewLink: 'New link', slotNewFeed: 'New feed', slotNewAsset: 'New asset', editFeed: 'Edit feed', editAsset: 'Edit asset', dropWidgetsHere: 'Drag a widget here', desc_weather: 'Choose the city you want the weather for.', weatherHint: 'Search for your city and click a result to use it. Weather comes from Open-Meteo, no API key needed.', weatherCurrent: 'Current location', weatherSearchLabel: 'Search city', weatherSearchPh: 'London, Berlin, Lima…', weatherNoResults: 'No results. Try another name.', weatherSearchError: 'Could not search for the city. Please try again.', weatherSaved: '✓ Location updated', weatherUse: 'Use this location', slotNewChannel: 'New channel', editChannel: 'Edit channel', videosWord: 'videos', channelDefaultName: 'Channel', clickToEdit: 'Click to edit', editGroup: 'Edit group', linkOpenWindow: 'New window',
     general: 'General',
     appearanceTab: 'Theme & text',
     grpContent: 'My page',
@@ -787,7 +789,7 @@ const LANGUAGES = {
     newSection: 'Новый раздел', sectionName: 'Название раздела', sectionPlaceholder: 'Работа, Dev, Дом…',
     createSection: 'Создать раздел', newGroupIn: 'Новая группа в:', groupName: 'Название группы',
     groupPlaceholder: 'Gmail, GitHub, Proxmox…', createGroup: 'Создать группу', addLinkTo: 'Добавить ссылку в:',
-    linkOpenLabel: 'Открывать в', linkOpenNew: 'Новой вкладке', linkOpenSame: 'Текущей вкладке', editSection: 'Изменить раздел', dragToReorder: 'Перетащите, чтобы изменить порядок', dropHere: 'Отпустите здесь', dropLinksHere: 'Перетащите ссылку сюда', dropGroupsHere: 'Перетащите группу сюда', slotNewSection: 'Новый раздел', slotNewGroup: 'Новая группа', slotNewLink: 'Новая ссылка', slotNewFeed: 'Новая лента', slotNewAsset: 'Новый актив', editFeed: 'Изменить ленту', editAsset: 'Изменить актив', dropWidgetsHere: 'Перетащите виджет сюда', slotNewChannel: 'Новый канал', editChannel: 'Изменить канал', videosWord: 'видео', channelDefaultName: 'Канал', clickToEdit: 'Нажмите, чтобы изменить', editGroup: 'Изменить группу', linkOpenWindow: 'Новом окне',
+    linkOpenLabel: 'Открывать в', linkOpenNew: 'Новой вкладке', linkOpenSame: 'Текущей вкладке', editSection: 'Изменить раздел', dragToReorder: 'Перетащите, чтобы изменить порядок', dropHere: 'Отпустите здесь', dropLinksHere: 'Перетащите ссылку сюда', dropGroupsHere: 'Перетащите группу сюда', slotNewSection: 'Новый раздел', slotNewGroup: 'Новая группа', slotNewLink: 'Новая ссылка', slotNewFeed: 'Новая лента', slotNewAsset: 'Новый актив', editFeed: 'Изменить ленту', editAsset: 'Изменить актив', dropWidgetsHere: 'Перетащите виджет сюда', desc_weather: 'Выберите город, для которого показывать погоду.', weatherHint: 'Найдите свой город и нажмите на результат. Погода берётся из Open-Meteo, ключ API не нужен.', weatherCurrent: 'Текущее местоположение', weatherSearchLabel: 'Найти город', weatherSearchPh: 'Москва, Берлин, Лима…', weatherNoResults: 'Ничего не найдено. Попробуйте другое название.', weatherSearchError: 'Не удалось выполнить поиск города. Попробуйте ещё раз.', weatherSaved: '✓ Местоположение обновлено', weatherUse: 'Использовать это местоположение', slotNewChannel: 'Новый канал', editChannel: 'Изменить канал', videosWord: 'видео', channelDefaultName: 'Канал', clickToEdit: 'Нажмите, чтобы изменить', editGroup: 'Изменить группу', linkOpenWindow: 'Новом окне',
     general: 'Общие',
     appearanceTab: 'Тема и текст',
     grpContent: 'Моя страница',
@@ -968,7 +970,7 @@ const LANGUAGES = {
     slotNewAsset: 'Nouvel actif',
     editFeed: 'Modifier le flux',
     editAsset: 'Modifier l\'actif',
-    dropWidgetsHere: 'Faites glisser un widget ici',
+    dropWidgetsHere: 'Faites glisser un widget ici', desc_weather: 'Choisissez la ville pour laquelle afficher la météo.', weatherHint: 'Recherchez votre ville et cliquez sur un résultat pour l\'utiliser. La météo vient d\'Open-Meteo, sans clé d\'API.', weatherCurrent: 'Position actuelle', weatherSearchLabel: 'Rechercher une ville', weatherSearchPh: 'Paris, Berlin, Lima…', weatherNoResults: 'Aucun résultat. Essayez un autre nom.', weatherSearchError: 'Impossible de rechercher la ville. Réessayez.', weatherSaved: '✓ Position mise à jour', weatherUse: 'Utiliser cette position',
     slotNewChannel: 'Nouvelle chaîne',
     editChannel: 'Modifier la chaîne',
     videosWord: 'vidéos',
@@ -1230,7 +1232,7 @@ const LANGUAGES = {
     slotNewAsset: 'Neuer Wert',
     editFeed: 'Feed bearbeiten',
     editAsset: 'Wert bearbeiten',
-    dropWidgetsHere: 'Widget hierher ziehen',
+    dropWidgetsHere: 'Widget hierher ziehen', desc_weather: 'Wähle die Stadt, für die das Wetter angezeigt wird.', weatherHint: 'Suche deine Stadt und klicke auf ein Ergebnis, um sie zu verwenden. Das Wetter kommt von Open-Meteo, ohne API-Schlüssel.', weatherCurrent: 'Aktueller Standort', weatherSearchLabel: 'Stadt suchen', weatherSearchPh: 'Berlin, Wien, Lima…', weatherNoResults: 'Keine Ergebnisse. Versuche einen anderen Namen.', weatherSearchError: 'Die Stadt konnte nicht gesucht werden. Bitte erneut versuchen.', weatherSaved: '✓ Standort aktualisiert', weatherUse: 'Diesen Standort verwenden',
     slotNewChannel: 'Neuer Kanal',
     editChannel: 'Kanal bearbeiten',
     videosWord: 'Videos',
@@ -1823,21 +1825,142 @@ function refreshFeeds() { feedCache = {}; renderFeedTabs(); }
 // ════════════════════════════════════════════════
 //  WEATHER (Open-Meteo — no API key needed)
 // ════════════════════════════════════════════════
+// ── Weather icons: thin-line SVGs in the add-on's icon style, built with DOM methods (no innerHTML) ──
+const WX_NS = 'http://www.w3.org/2000/svg';
+function wxEl(tag, attrs, parent) {
+  const e = document.createElementNS(WX_NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+// WMO weather code -> visual group (and a code whose label stands in when ours has no text for the exact code)
+function weatherGroup(code) {
+  if (code === 0 || code === 1) return 'clear';
+  if (code === 2) return 'partly';
+  if (code === 3) return 'overcast';
+  if (code === 45 || code === 48) return 'fog';
+  if (code >= 51 && code <= 57) return 'drizzle';
+  if ((code >= 61 && code <= 67) || (code >= 80 && code <= 82)) return 'rain';
+  if ((code >= 71 && code <= 77) || code === 85 || code === 86) return 'snow';
+  if (code >= 95) return 'storm';
+  return 'overcast';
+}
+const WX_LABEL_CODE = { clear: 0, partly: 2, overcast: 3, fog: 45, drizzle: 51, rain: 61, snow: 71, storm: 95 };
+const WX_CLOUD = 'M7 18.5h10.5a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.6 9.9 4.3 4.3 0 0 0 7 18.5z';
+
+function renderWeatherIcon(code, isDay) {
+  const box = document.getElementById('weatherIcon'); if (!box) return;
+  box.textContent = '';
+  const svg = wxEl('svg', { viewBox: '0 0 24 24', fill: 'none', 'stroke-width': '0.95', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', class: 'wx-svg' }, box);
+  const g = weatherGroup(code);
+  const cloud = (dy, cls) => {  // outer <g> positions it, inner <path> floats (CSS transform would override the attribute)
+    const o = wxEl('g', { transform: 'translate(0 ' + dy + ')' }, svg);
+    wxEl('path', { d: WX_CLOUD, class: 'wx-cloud ' + (cls || '') }, o);
+  };
+  const sun = (cx, cy, r, raysD) => {
+    const o = wxEl('g', { class: 'wx-sun' }, svg);
+    wxEl('circle', { cx, cy, r, class: 'wx-gold wx-gold-fill' }, o);
+    wxEl('path', { d: raysD, class: 'wx-gold wx-rays' }, o);
+  };
+  const moon = (tx, ty, sc) => {
+    const o = wxEl('g', { transform: 'translate(' + tx + ' ' + ty + ') scale(' + sc + ')' }, svg);
+    wxEl('path', { d: 'M17.5 13.2A7 7 0 1 1 10.8 4.2 5.4 5.4 0 0 0 17.5 13.2z', class: 'wx-gold wx-gold-fill' }, o);
+    return o;
+  };
+  const stars = () => {
+    wxEl('path', { d: 'M18 4.2v2.2M16.9 5.3h2.2', class: 'wx-gold wx-star' }, svg);
+    wxEl('path', { d: 'M21 9.4v1.6M20.2 10.2h1.6', class: 'wx-gold wx-star wx-star2' }, svg);
+  };
+
+  if (g === 'clear') {
+    if (isDay === 0) { moon(0.8, 2.2, 1.12); stars(); } else sun(12, 12, 3.9, 'M18.60 12.00L21.00 12.00M16.67 16.67L18.36 18.36M12.00 18.60L12.00 21.00M7.33 16.67L5.64 18.36M5.40 12.00L3.00 12.00M7.33 7.33L5.64 5.64M12.00 5.40L12.00 3.00M16.67 7.33L18.36 5.64');
+  } else if (g === 'partly') {
+    if (isDay === 0) { moon(-0.9, -1.9, 0.86); } else sun(10, 9.4, 3.2, 'M15.20 9.40L17.20 9.40M13.68 13.08L15.09 14.49M10.00 14.60L10.00 16.60M6.32 13.08L4.91 14.49M4.80 9.40L2.80 9.40M6.32 5.72L4.91 4.31M10.00 4.20L10.00 2.20M13.68 5.72L15.09 4.31');
+    cloud(1.4);
+  } else if (g === 'overcast') {
+    const back = wxEl('g', { transform: 'translate(4.6 -3.6) scale(0.8)', opacity: '0.55' }, svg);
+    wxEl('path', { d: WX_CLOUD, class: 'wx-cloud wx-cloud-back' }, back);
+    cloud(1.4, 'wx-cloud-opaque');
+  } else if (g === 'fog') {
+    cloud(-4.2);
+    const f = wxEl('g', { class: 'wx-fog' }, svg);
+    wxEl('path', { d: 'M5 17.2h14', class: 'wx-gold' }, f);
+    wxEl('path', { d: 'M7.5 19.8h12', class: 'wx-gold wx-fog2' }, f);
+    wxEl('path', { d: 'M5 22.4h9', class: 'wx-gold' }, f);
+  } else {
+    if (g === 'storm') wxEl('circle', { cx: 12, cy: 10.5, r: 10.6, class: 'wx-flash' }, svg);
+    cloud(-3.2, g === 'storm' ? 'wx-cloud-storm' : '');
+    if (g === 'drizzle') {
+      wxEl('path', { d: 'M8.6 18.4l-.7 1.9M12.6 19.4l-.7 1.9M16.6 18.4l-.7 1.9', class: 'wx-gold wx-drop wx-drop-sm' }, svg);
+    } else if (g === 'rain') {
+      wxEl('path', { d: 'M8.4 17.4l-1.2 3.6', class: 'wx-gold wx-drop' }, svg);
+      wxEl('path', { d: 'M12.4 17.4l-1.2 3.6', class: 'wx-gold wx-drop wx-d2' }, svg);
+      wxEl('path', { d: 'M16.4 17.4l-1.2 3.6', class: 'wx-gold wx-drop wx-d3' }, svg);
+    } else if (g === 'snow') {
+      [[8.2, 18.6], [12.4, 21], [16.2, 18.6]].forEach(([x, y], i) =>
+        wxEl('circle', { cx: x, cy: y, r: '0.95', class: 'wx-flake' + (i ? ' wx-d' + (i + 1) : '') }, svg));
+    } else if (g === 'storm') {
+      wxEl('path', { d: 'M7.9 17.4l-1 3M17.1 17.4l-1 3', class: 'wx-gold wx-drop wx-drop-storm' }, svg);
+      wxEl('path', { d: 'M12.9 17.4l-.9 2.8', class: 'wx-gold wx-drop wx-drop-storm wx-d2' }, svg);
+      wxEl('path', { d: 'M13.4 14.6L9.8 19h2.6l-1.2 3.6 4.2-5h-2.6z', class: 'wx-gold wx-gold-fill wx-bolt' }, svg);
+    }
+  }
+}
+
 async function loadWeather() {
   try {
-    // Valencia coords
-    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=39.47&longitude=-0.37&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code&wind_speed_unit=kmh');
+    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + weatherConfig.lat + '&longitude=' + weatherConfig.lon + '&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,is_day&wind_speed_unit=kmh');
     const d = await res.json(); const c = d.current;
-    const desc = (t.weatherCodes && t.weatherCodes[c.weather_code]) || '';
+    const wg = weatherGroup(c.weather_code);
+    const desc = (t.weatherCodes && (t.weatherCodes[c.weather_code] || t.weatherCodes[WX_LABEL_CODE[wg]])) || '';
+    renderWeatherIcon(c.weather_code, c.is_day);
     const tempEl = document.querySelector('.weather-temp');
     tempEl.textContent = Math.round(c.temperature_2m);
     const sup = document.createElement('sup'); sup.textContent = '°C';
     tempEl.appendChild(sup);
-    document.getElementById('weatherDesc').textContent = desc + ' · Valencia';
+    document.getElementById('weatherDesc').textContent = desc + ' · ' + weatherConfig.name;
     document.getElementById('wWind').textContent = Math.round(c.wind_speed_10m) + 'km/h';
     document.getElementById('wHum').textContent  = c.relative_humidity_2m + '%';
     document.getElementById('wFeel').textContent = Math.round(c.apparent_temperature) + '°C';
   } catch {}
+}
+
+// ── Weather location (Settings → Weather): city search through Open-Meteo's geocoding API ──
+function renderWeatherModal() {
+  const cur = document.getElementById('weatherCurrent'); if (!cur) return;
+  cur.textContent = weatherConfig.name + ' · ' + Number(weatherConfig.lat).toFixed(2) + ', ' + Number(weatherConfig.lon).toFixed(2);
+  document.getElementById('weatherResults').textContent = '';
+  document.getElementById('weatherMsg').textContent = '';
+}
+async function searchWeatherCity() {
+  const q = document.getElementById('wcQuery').value.trim();
+  const list = document.getElementById('weatherResults'), msg = document.getElementById('weatherMsg');
+  if (!q) return;
+  list.textContent = ''; msg.textContent = t.loading;
+  try {
+    const res = await fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(q) + '&count=6&format=json&language=' + currentLang,
+      { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) throw new Error(res.status);
+    const found = (await res.json()).results || [];
+    msg.textContent = found.length ? '' : t.weatherNoResults;
+    found.forEach(r => {
+      const card = document.createElement('div'); card.className = 'item-card click-edit'; card.title = t.weatherUse;
+      const info = document.createElement('div'); info.className = 'item-card-info';
+      const nm = document.createElement('div'); nm.className = 'item-card-name';
+      nm.textContent = [r.name, r.admin1, r.country].filter(Boolean).join(', ');
+      const sb = document.createElement('div'); sb.className = 'item-card-sub';
+      sb.textContent = Number(r.latitude).toFixed(2) + ', ' + Number(r.longitude).toFixed(2);
+      info.appendChild(nm); info.appendChild(sb); card.appendChild(info);
+      card.addEventListener('click', () => selectWeatherCity(r));
+      list.appendChild(card);
+    });
+  } catch (e) { msg.textContent = t.weatherSearchError; }
+}
+async function selectWeatherCity(r) {
+  weatherConfig = { name: r.name, lat: r.latitude, lon: r.longitude };
+  await Store.set('gd_weather', weatherConfig);
+  loadWeather(); renderWeatherModal();
+  document.getElementById('weatherMsg').textContent = t.weatherSaved;
 }
 
 // ════════════════════════════════════════════════
@@ -2005,6 +2128,7 @@ function switchTab(tab) {
   if (tab==='links') renderSectionModal();
   if (tab==='feeds') renderFeedModal();
   if (tab==='markets') renderMarketModal();
+  if (tab==='weather') renderWeatherModal();
   if (tab==='general') { renderEngineModal(); renderLangModal(); }
   if (tab==='uptime')  renderUptimeModal();
   if (tab==='proxmox') renderProxmoxModal();
@@ -3179,6 +3303,7 @@ function exportConfig() {
     proxmox:  { url: proxmoxConfig.url, tokenId: proxmoxConfig.tokenId, tokenSecret: '', name: proxmoxConfig.name, selected: proxmoxConfig.selected },
     docker:   { url: dockerConfig.url,  apiKey: '', endpointId: dockerConfig.endpointId, name: dockerConfig.name },
     pihole:   { url: piholeConfig.url,  password: '' },
+    weather:  weatherConfig,
     wall:     { ...wallSettings, src: null }, // skip image URL if any — user can re-add
   };
   // Include wall src only if it's a URL (not base64)
@@ -3225,6 +3350,7 @@ function importConfig(file) {
       if (config.lang)     { applyLang(config.lang); }
       if (config.theme)    { applyTheme(config.theme); }
       if (config.fontsize) { applyFontSize(config.fontsize); }
+      if (config.weather && config.weather.name) { weatherConfig = config.weather; await Store.set('gd_weather', weatherConfig); loadWeather(); }
       if (config.uptime)   { uptimeConfig = config.uptime; await Store.set('gd_uptime', uptimeConfig); loadUptime(true); }
       // Homelab configs: backups carry no secrets, so keep any existing local secret
       // rather than blanking it. mergeSvc applies imported fields but preserves
@@ -4047,7 +4173,7 @@ function updateEditIconPreview(url) {
 // ════════════════════════════════════════════════
 // Fallback only for when the page is opened outside the extension context
 // (e.g. dashboard.html served as a plain file). The real source of truth is manifest.json.
-const APP_VERSION_FALLBACK = '1.12.0';
+const APP_VERSION_FALLBACK = '1.12.1';
 
 function getAppVersion() {
   try {
@@ -4059,6 +4185,12 @@ function getAppVersion() {
 
 // What's-new list shown in the About tab. Newest first; items translated per language.
 const CHANGELOG = [
+  { v: '1.12.1',
+    es: ['Ubicación del tiempo configurable: busca tu ciudad en Configuración o con el engranaje del widget', 'Iconos animados del tiempo: sol, luna, nubes, niebla, lluvia, nieve y tormenta con relámpagos'],
+    en: ['Configurable weather location: search your city in Settings or with the widget\'s gear', 'Animated weather icons: sun, moon, clouds, fog, rain, snow and thunderstorms with lightning'],
+    ru: ['Настраиваемое местоположение погоды: найдите свой город в настройках или через шестерёнку виджета', 'Анимированные значки погоды: солнце, луна, облака, туман, дождь, снег и гроза с молниями'],
+    fr: ['Position météo configurable : recherchez votre ville dans les paramètres ou via l\'engrenage du widget', 'Icônes météo animées : soleil, lune, nuages, brouillard, pluie, neige et orages avec éclairs'],
+    de: ['Einstellbarer Wetterstandort: Suche deine Stadt in den Einstellungen oder über das Zahnrad des Widgets', 'Animierte Wettersymbole: Sonne, Mond, Wolken, Nebel, Regen, Schnee und Gewitter mit Blitzen'] },
   { v: '1.12.0',
     es: ['Configuración rediseñada: menú por grupos, descripción en cada panel y diálogos aparte para añadir y editar', 'Arrastrar y soltar para ordenar links, secciones, grupos, vídeos, feeds, mercados y widgets (en dos columnas, izquierda y derecha)', 'Cada link se abre en pestaña nueva, pestaña actual o ventana nueva', 'Nuevos idiomas: francés y alemán', 'Modal de bienvenida en el primer uso y nuevo logo'],
     en: ['Redesigned settings: grouped menu, a description on each panel and separate dialogs to add and edit', 'Drag & drop to reorder links, sections, groups, videos, feeds, markets and widgets (in two columns, left and right)', 'Each link opens in a new tab, the current tab or a new window', 'New languages: French and German', 'Welcome dialog on first use and a new logo'],
@@ -4207,6 +4339,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnSavePihole').addEventListener('click', savePiholeConfig);
   document.getElementById('btnRemovePihole').addEventListener('click', removePiholeConfig);
   document.getElementById('btnManageMarkets').addEventListener('click', () => openModal('markets'));
+  document.getElementById('btnManageWeather').addEventListener('click', () => openModal('weather'));
+  document.getElementById('btnWeatherSearch').addEventListener('click', searchWeatherCity);
+  document.getElementById('wcQuery').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); searchWeatherCity(); } });
   document.getElementById('btnRefreshMarkets').addEventListener('click', loadMarkets);
   document.getElementById('btnAddMarket').addEventListener('click', addMarket);
   document.getElementById('btnMarketPresets').addEventListener('click', toggleMarketPresets);
@@ -4273,6 +4408,7 @@ async function init() {
   proxmoxConfig = await Store.get('gd_proxmox', proxmoxConfig);
   dockerConfig  = await Store.get('gd_docker',  dockerConfig);
   piholeConfig  = await Store.get('gd_pihole',  piholeConfig);
+  weatherConfig = await Store.get('gd_weather', weatherConfig);
   channels = await Store.get('gd_channels', DEFAULT_CHANNELS);
   widgets = normalizeWidgets(await Store.get('gd_widgets', null) || DEFAULT_WIDGETS.map(w => ({ ...w })));
   renderAbout();

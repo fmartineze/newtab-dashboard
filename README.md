@@ -97,7 +97,7 @@ Toda la configuración se hace desde el botón **⚙** de la interfaz, sin tocar
 - Exportar e importar la configuración completa
 - Consultar la información del proyecto, versión y licencia en la pestaña **Acerca de**
 
-Para cambiar la ciudad del clima, edita las coordenadas en `dashboard.js` (busca `open-meteo.com`).
+Para cambiar la ciudad del clima, ve a **Configuración → Clima** (o pulsa el engranaje del widget) y busca tu ciudad.
 
 ---
 

@@ -140,10 +140,18 @@
 
       <!-- Widget: Weather -->
       <section class="widget" id="w-weather" data-widget="weather">
-        <div class="sec-head"><span class="sec-title" data-i18n="weather"></span></div>
+        <div class="sec-head">
+          <span class="sec-title" data-i18n="weather"></span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="sb-refresh" id="btnManageWeather" data-i18n-title="manage" style="font-size:11px">⚙</button>
+          </div>
+        </div>
         <div class="weather-card">
-          <div class="weather-temp">—<sup>°C</sup></div>
-          <div class="weather-desc" id="weatherDesc">Valencia, España</div>
+          <div class="weather-top">
+            <div class="weather-temp">—<sup>°C</sup></div>
+            <div class="weather-icon" id="weatherIcon" aria-hidden="true"></div>
+          </div>
+          <div class="weather-desc" id="weatherDesc">—</div>
           <div class="weather-row">
             <div class="wstat"><div class="wstat-l" data-i18n="wind"></div><div class="wstat-v" id="wWind">—</div></div>
             <div class="wstat"><div class="wstat-l" data-i18n="humidity"></div><div class="wstat-v" id="wHum">—</div></div>
@@ -451,6 +459,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 000 18M8 8l8 8M16 8l-8 8"/></svg>
         <span data-i18n="piholeWidget"></span>
       </div>
+      <div class="modal-tab" data-tab="weather" data-widget-tab="weather">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <span data-i18n="weather"></span>
+      </div>
       <div class="modal-tab" data-tab="markets" data-widget-tab="markets">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 7l-7.5 7.5-4-4L2 19"/><path d="M16 7h6v6"/></svg>
         <span data-i18n="markets"></span>
@@ -475,6 +487,18 @@
       <!-- TAB FEEDS -->
       <div class="modal-panel" id="tab-feeds">
         <div class="item-list" id="feedItemList"></div>
+      </div>
+
+      <!-- TAB WEATHER -->
+      <div class="modal-panel" id="tab-weather">
+        <p class="hint-text" data-i18n="weatherHint"></p>
+        <div class="field"><label data-i18n="weatherCurrent"></label><div class="item-card"><div class="item-card-info"><div class="item-card-name" id="weatherCurrent"></div></div></div></div>
+        <div class="url-row">
+          <div class="field url-field"><label data-i18n="weatherSearchLabel"></label><input id="wcQuery" type="text" data-i18n-placeholder="weatherSearchPh" placeholder="" autocomplete="off" /></div>
+          <button class="btn btn-primary btn-sm" id="btnWeatherSearch" data-i18n="search"></button>
+        </div>
+        <div class="item-list" id="weatherResults"></div>
+        <div class="hint-text" id="weatherMsg"></div>
       </div>
 
       <!-- TAB MARKETS -->

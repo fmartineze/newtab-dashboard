@@ -97,7 +97,7 @@ All configuration is done through the **⚙** button in the UI — no code editi
 - Export and import the full configuration
 - Check project info, version and license in the **About** tab
 
-To change the weather city, edit the coordinates in `dashboard.js` (search for `open-meteo.com`).
+To change the weather city, go to **Settings → Weather** (or click the widget's gear) and search for your city.
 
 ---
 
