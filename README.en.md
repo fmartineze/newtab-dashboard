@@ -42,6 +42,7 @@ The dashboard is split into three columns:
 - **Configurable widgets** — Enable, disable, move between bars and reorder the dashboard widgets (clock, feeds, weather, calendar, markets, notes, Uptime Kuma, Proxmox, Docker, Pi-hole)
 - **Homelab monitoring** — Proxmox VM status, Docker containers (via Portainer) and Pi-hole stats, with CPU and RAM usage. Credentials are only ever sent to your own servers
 - **Import / Export** — Save and restore your full configuration as a JSON file
+- **Toolbar menu** — A Firefox toolbar icon opens a menu with your links by section and group, with search and keyboard navigation (turn it on or off in Settings → Links)
 - **Multilanguage** — Interface available in Spanish, English, Russian, French and German
 - **No dependencies** — Vanilla JS, no frameworks or bundler
 

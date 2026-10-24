@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "My Dashboard",
-  "version": "1.12.1",
+  "version": "1.13.0",
   "description": "A minimal, elegant new tab dashboard",
   "chrome_url_overrides": {
     "newtab": "dashboard.html"
@@ -17,6 +17,18 @@
   "icons": {
     "48": "icon48.png",
     "128": "icon128.png"
+  },
+  "browser_action": {
+    "default_title": "NewTab Dashboard",
+    "default_icon": {
+      "16": "icon16.png",
+      "32": "icon32.png"
+    },
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
   },
   "web_accessible_resources": [
     "dashboard.css",

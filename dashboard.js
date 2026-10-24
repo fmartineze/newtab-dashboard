@@ -58,6 +58,7 @@ if (USE_SYNC) {
     if (changes.gd_uptime)   { uptimeConfig = changes.gd_uptime.newValue; loadUptime(); }
     if (changes.gd_proxmox)  { proxmoxConfig = changes.gd_proxmox.newValue; loadProxmox(); }
     if (changes.gd_docker)   { dockerConfig = changes.gd_docker.newValue; loadDocker(); }
+    if (changes.gd_menu)     { menuEnabled = changes.gd_menu.newValue !== false; applyMenuState(); renderMenuSwitch(); }
     if (changes.gd_weather)  { weatherConfig = changes.gd_weather.newValue; loadWeather(); renderWeatherModal(); }
     if (changes.gd_pihole)   { piholeConfig = changes.gd_pihole.newValue; piholeSid = null; loadPihole(); }
     if (changes.gd_widgets)  { widgets = normalizeWidgets(changes.gd_widgets.newValue); renderWidgetLayout(); renderModalNav(); renderWidgetsModal(); }
@@ -136,6 +137,7 @@ const MARKET_PRESETS = [
 const DEFAULT_CHANNELS = [];
 let channels  = DEFAULT_CHANNELS;
 let uptimeConfig = { url: '', slug: 'default' }; // Uptime Kuma
+let menuEnabled = true; // toolbar links menu on/off (Settings → Links)
 let weatherConfig = { name: 'Valencia', lat: 39.47, lon: -0.37 }; // weather location (changed from Settings → Weather)
 let proxmoxConfig = { url: '', tokenId: '', tokenSecret: '', name: '', selected: [] }; // Proxmox VE (selected = vmids to detail)
 let proxmoxVms = []; // last fetched guest list, for the config selection UI
@@ -289,7 +291,7 @@ const LANGUAGES = {
     createGroup:    'Crear grupo',
     addLinkTo:      'Añadir link en:',
     addLink:        'Añadir link',
-    linkOpenLabel:  'Abrir en', linkOpenNew: 'Pestaña nueva', linkOpenSame: 'Pestaña actual', editSection: 'Editar sección', dragToReorder: 'Arrastra para reordenar', dropHere: 'Soltar aquí', dropLinksHere: 'Arrastra un link aquí', dropGroupsHere: 'Arrastra un grupo aquí', slotNewSection: 'Nueva sección', slotNewGroup: 'Nuevo grupo', slotNewLink: 'Nuevo link', slotNewFeed: 'Nuevo feed', slotNewAsset: 'Nuevo activo', editFeed: 'Editar feed', editAsset: 'Editar activo', dropWidgetsHere: 'Arrastra un widget aquí', desc_weather: 'Elige la ciudad para la que quieres ver el tiempo.', weatherHint: 'Busca tu ciudad y haz clic en un resultado para usarla. El tiempo viene de Open-Meteo, sin clave de API.', weatherCurrent: 'Ubicación actual', weatherSearchLabel: 'Buscar ciudad', weatherSearchPh: 'Madrid, Berlín, Lima…', weatherNoResults: 'Sin resultados. Prueba con otro nombre.', weatherSearchError: 'No se pudo buscar la ciudad. Inténtalo de nuevo.', weatherSaved: '✓ Ubicación actualizada', weatherUse: 'Usar esta ubicación', slotNewChannel: 'Nuevo canal', editChannel: 'Editar canal', videosWord: 'vídeos', channelDefaultName: 'Canal', clickToEdit: 'Haz clic para editar', editGroup: 'Editar grupo', linkOpenWindow: 'Ventana nueva',
+    linkOpenLabel:  'Abrir en', linkOpenNew: 'Pestaña nueva', linkOpenSame: 'Pestaña actual', editSection: 'Editar sección', dragToReorder: 'Arrastra para reordenar', dropHere: 'Soltar aquí', dropLinksHere: 'Arrastra un link aquí', dropGroupsHere: 'Arrastra un grupo aquí', slotNewSection: 'Nueva sección', slotNewGroup: 'Nuevo grupo', slotNewLink: 'Nuevo link', slotNewFeed: 'Nuevo feed', slotNewAsset: 'Nuevo activo', editFeed: 'Editar feed', editAsset: 'Editar activo', dropWidgetsHere: 'Arrastra un widget aquí', menuToggleHowTo: '<strong>Cómo fijarlo en la barra:</strong> pulsa el botón de Extensiones (la pieza de puzle), haz clic en «⋯» junto a esta extensión y elige «Fijar en la barra de herramientas».', menuToggleTitle: 'Menú de links en la barra de Firefox', menuToggleHint: 'Añade un icono a la barra de herramientas que abre un menú con tus links organizados por secciones y grupos, con búsqueda. Si lo desactivas, el icono queda inactivo; puedes quitarlo de la barra con clic derecho sobre él.', desc_weather: 'Elige la ciudad para la que quieres ver el tiempo.', weatherHint: 'Busca tu ciudad y haz clic en un resultado para usarla. El tiempo viene de Open-Meteo, sin clave de API.', weatherCurrent: 'Ubicación actual', weatherSearchLabel: 'Buscar ciudad', weatherSearchPh: 'Madrid, Berlín, Lima…', weatherNoResults: 'Sin resultados. Prueba con otro nombre.', weatherSearchError: 'No se pudo buscar la ciudad. Inténtalo de nuevo.', weatherSaved: '✓ Ubicación actualizada', weatherUse: 'Usar esta ubicación', slotNewChannel: 'Nuevo canal', editChannel: 'Editar canal', videosWord: 'vídeos', channelDefaultName: 'Canal', clickToEdit: 'Haz clic para editar', editGroup: 'Editar grupo', linkOpenWindow: 'Ventana nueva',
     general: 'General',
     appearanceTab: 'Tema y texto',
     grpContent: 'Mi página',
@@ -560,7 +562,7 @@ const LANGUAGES = {
     createGroup:    'Create group',
     addLinkTo:      'Add link to:',
     addLink:        'Add link',
-    linkOpenLabel:  'Open in', linkOpenNew: 'New tab', linkOpenSame: 'Current tab', editSection: 'Edit section', dragToReorder: 'Drag to reorder', dropHere: 'Drop here', dropLinksHere: 'Drag a link here', dropGroupsHere: 'Drag a group here', slotNewSection: 'New section', slotNewGroup: 'New group', slotNewLink: 'New link', slotNewFeed: 'New feed', slotNewAsset: 'New asset', editFeed: 'Edit feed', editAsset: 'Edit asset', dropWidgetsHere: 'Drag a widget here', desc_weather: 'Choose the city you want the weather for.', weatherHint: 'Search for your city and click a result to use it. Weather comes from Open-Meteo, no API key needed.', weatherCurrent: 'Current location', weatherSearchLabel: 'Search city', weatherSearchPh: 'London, Berlin, Lima…', weatherNoResults: 'No results. Try another name.', weatherSearchError: 'Could not search for the city. Please try again.', weatherSaved: '✓ Location updated', weatherUse: 'Use this location', slotNewChannel: 'New channel', editChannel: 'Edit channel', videosWord: 'videos', channelDefaultName: 'Channel', clickToEdit: 'Click to edit', editGroup: 'Edit group', linkOpenWindow: 'New window',
+    linkOpenLabel:  'Open in', linkOpenNew: 'New tab', linkOpenSame: 'Current tab', editSection: 'Edit section', dragToReorder: 'Drag to reorder', dropHere: 'Drop here', dropLinksHere: 'Drag a link here', dropGroupsHere: 'Drag a group here', slotNewSection: 'New section', slotNewGroup: 'New group', slotNewLink: 'New link', slotNewFeed: 'New feed', slotNewAsset: 'New asset', editFeed: 'Edit feed', editAsset: 'Edit asset', dropWidgetsHere: 'Drag a widget here', menuToggleHowTo: '<strong>How to pin it to the toolbar:</strong> click the Extensions button (the puzzle piece), click “⋯” next to this extension and choose “Pin to Toolbar”.', menuToggleTitle: 'Links menu in the Firefox toolbar', menuToggleHint: 'Adds a toolbar icon that opens a menu with your links organized by sections and groups, with search. When turned off the icon stays inactive; you can remove it from the toolbar by right-clicking it.', desc_weather: 'Choose the city you want the weather for.', weatherHint: 'Search for your city and click a result to use it. Weather comes from Open-Meteo, no API key needed.', weatherCurrent: 'Current location', weatherSearchLabel: 'Search city', weatherSearchPh: 'London, Berlin, Lima…', weatherNoResults: 'No results. Try another name.', weatherSearchError: 'Could not search for the city. Please try again.', weatherSaved: '✓ Location updated', weatherUse: 'Use this location', slotNewChannel: 'New channel', editChannel: 'Edit channel', videosWord: 'videos', channelDefaultName: 'Channel', clickToEdit: 'Click to edit', editGroup: 'Edit group', linkOpenWindow: 'New window',
     general: 'General',
     appearanceTab: 'Theme & text',
     grpContent: 'My page',
@@ -789,7 +791,7 @@ const LANGUAGES = {
     newSection: 'Новый раздел', sectionName: 'Название раздела', sectionPlaceholder: 'Работа, Dev, Дом…',
     createSection: 'Создать раздел', newGroupIn: 'Новая группа в:', groupName: 'Название группы',
     groupPlaceholder: 'Gmail, GitHub, Proxmox…', createGroup: 'Создать группу', addLinkTo: 'Добавить ссылку в:',
-    linkOpenLabel: 'Открывать в', linkOpenNew: 'Новой вкладке', linkOpenSame: 'Текущей вкладке', editSection: 'Изменить раздел', dragToReorder: 'Перетащите, чтобы изменить порядок', dropHere: 'Отпустите здесь', dropLinksHere: 'Перетащите ссылку сюда', dropGroupsHere: 'Перетащите группу сюда', slotNewSection: 'Новый раздел', slotNewGroup: 'Новая группа', slotNewLink: 'Новая ссылка', slotNewFeed: 'Новая лента', slotNewAsset: 'Новый актив', editFeed: 'Изменить ленту', editAsset: 'Изменить актив', dropWidgetsHere: 'Перетащите виджет сюда', desc_weather: 'Выберите город, для которого показывать погоду.', weatherHint: 'Найдите свой город и нажмите на результат. Погода берётся из Open-Meteo, ключ API не нужен.', weatherCurrent: 'Текущее местоположение', weatherSearchLabel: 'Найти город', weatherSearchPh: 'Москва, Берлин, Лима…', weatherNoResults: 'Ничего не найдено. Попробуйте другое название.', weatherSearchError: 'Не удалось выполнить поиск города. Попробуйте ещё раз.', weatherSaved: '✓ Местоположение обновлено', weatherUse: 'Использовать это местоположение', slotNewChannel: 'Новый канал', editChannel: 'Изменить канал', videosWord: 'видео', channelDefaultName: 'Канал', clickToEdit: 'Нажмите, чтобы изменить', editGroup: 'Изменить группу', linkOpenWindow: 'Новом окне',
+    linkOpenLabel: 'Открывать в', linkOpenNew: 'Новой вкладке', linkOpenSame: 'Текущей вкладке', editSection: 'Изменить раздел', dragToReorder: 'Перетащите, чтобы изменить порядок', dropHere: 'Отпустите здесь', dropLinksHere: 'Перетащите ссылку сюда', dropGroupsHere: 'Перетащите группу сюда', slotNewSection: 'Новый раздел', slotNewGroup: 'Новая группа', slotNewLink: 'Новая ссылка', slotNewFeed: 'Новая лента', slotNewAsset: 'Новый актив', editFeed: 'Изменить ленту', editAsset: 'Изменить актив', dropWidgetsHere: 'Перетащите виджет сюда', menuToggleHowTo: '<strong>Как закрепить на панели:</strong> нажмите кнопку «Расширения» (значок пазла), нажмите «⋯» рядом с этим расширением и выберите «Закрепить на панели инструментов».', menuToggleTitle: 'Меню ссылок на панели Firefox', menuToggleHint: 'Добавляет на панель инструментов значок, который открывает меню со ссылками по разделам и группам, с поиском. Если отключить, значок станет неактивным; убрать его с панели можно правым кликом по нему.', desc_weather: 'Выберите город, для которого показывать погоду.', weatherHint: 'Найдите свой город и нажмите на результат. Погода берётся из Open-Meteo, ключ API не нужен.', weatherCurrent: 'Текущее местоположение', weatherSearchLabel: 'Найти город', weatherSearchPh: 'Москва, Берлин, Лима…', weatherNoResults: 'Ничего не найдено. Попробуйте другое название.', weatherSearchError: 'Не удалось выполнить поиск города. Попробуйте ещё раз.', weatherSaved: '✓ Местоположение обновлено', weatherUse: 'Использовать это местоположение', slotNewChannel: 'Новый канал', editChannel: 'Изменить канал', videosWord: 'видео', channelDefaultName: 'Канал', clickToEdit: 'Нажмите, чтобы изменить', editGroup: 'Изменить группу', linkOpenWindow: 'Новом окне',
     general: 'Общие',
     appearanceTab: 'Тема и текст',
     grpContent: 'Моя страница',
@@ -970,7 +972,7 @@ const LANGUAGES = {
     slotNewAsset: 'Nouvel actif',
     editFeed: 'Modifier le flux',
     editAsset: 'Modifier l\'actif',
-    dropWidgetsHere: 'Faites glisser un widget ici', desc_weather: 'Choisissez la ville pour laquelle afficher la météo.', weatherHint: 'Recherchez votre ville et cliquez sur un résultat pour l\'utiliser. La météo vient d\'Open-Meteo, sans clé d\'API.', weatherCurrent: 'Position actuelle', weatherSearchLabel: 'Rechercher une ville', weatherSearchPh: 'Paris, Berlin, Lima…', weatherNoResults: 'Aucun résultat. Essayez un autre nom.', weatherSearchError: 'Impossible de rechercher la ville. Réessayez.', weatherSaved: '✓ Position mise à jour', weatherUse: 'Utiliser cette position',
+    dropWidgetsHere: 'Faites glisser un widget ici', menuToggleHowTo: '<strong>Comment l’épingler à la barre :</strong> cliquez sur le bouton Extensions (la pièce de puzzle), cliquez sur « ⋯ » à côté de cette extension et choisissez « Épingler à la barre d’outils ».', menuToggleTitle: 'Menu des liens dans la barre Firefox', menuToggleHint: 'Ajoute une icône dans la barre d’outils qui ouvre un menu avec vos liens organisés par sections et groupes, avec recherche. Désactivée, l’icône devient inactive ; vous pouvez la retirer de la barre par clic droit sur celle-ci.', desc_weather: 'Choisissez la ville pour laquelle afficher la météo.', weatherHint: 'Recherchez votre ville et cliquez sur un résultat pour l\'utiliser. La météo vient d\'Open-Meteo, sans clé d\'API.', weatherCurrent: 'Position actuelle', weatherSearchLabel: 'Rechercher une ville', weatherSearchPh: 'Paris, Berlin, Lima…', weatherNoResults: 'Aucun résultat. Essayez un autre nom.', weatherSearchError: 'Impossible de rechercher la ville. Réessayez.', weatherSaved: '✓ Position mise à jour', weatherUse: 'Utiliser cette position',
     slotNewChannel: 'Nouvelle chaîne',
     editChannel: 'Modifier la chaîne',
     videosWord: 'vidéos',
@@ -1232,7 +1234,7 @@ const LANGUAGES = {
     slotNewAsset: 'Neuer Wert',
     editFeed: 'Feed bearbeiten',
     editAsset: 'Wert bearbeiten',
-    dropWidgetsHere: 'Widget hierher ziehen', desc_weather: 'Wähle die Stadt, für die das Wetter angezeigt wird.', weatherHint: 'Suche deine Stadt und klicke auf ein Ergebnis, um sie zu verwenden. Das Wetter kommt von Open-Meteo, ohne API-Schlüssel.', weatherCurrent: 'Aktueller Standort', weatherSearchLabel: 'Stadt suchen', weatherSearchPh: 'Berlin, Wien, Lima…', weatherNoResults: 'Keine Ergebnisse. Versuche einen anderen Namen.', weatherSearchError: 'Die Stadt konnte nicht gesucht werden. Bitte erneut versuchen.', weatherSaved: '✓ Standort aktualisiert', weatherUse: 'Diesen Standort verwenden',
+    dropWidgetsHere: 'Widget hierher ziehen', menuToggleHowTo: '<strong>So heftest du es an die Symbolleiste:</strong> Klicke auf die Schaltfläche „Erweiterungen“ (das Puzzleteil), klicke auf „⋯“ neben dieser Erweiterung und wähle „An Symbolleiste anheften“.', menuToggleTitle: 'Link-Menü in der Firefox-Symbolleiste', menuToggleHint: 'Fügt der Symbolleiste ein Symbol hinzu, das ein Menü mit deinen Links nach Abschnitten und Gruppen öffnet, mit Suche. Ausgeschaltet bleibt das Symbol inaktiv; per Rechtsklick kannst du es aus der Symbolleiste entfernen.', desc_weather: 'Wähle die Stadt, für die das Wetter angezeigt wird.', weatherHint: 'Suche deine Stadt und klicke auf ein Ergebnis, um sie zu verwenden. Das Wetter kommt von Open-Meteo, ohne API-Schlüssel.', weatherCurrent: 'Aktueller Standort', weatherSearchLabel: 'Stadt suchen', weatherSearchPh: 'Berlin, Wien, Lima…', weatherNoResults: 'Keine Ergebnisse. Versuche einen anderen Namen.', weatherSearchError: 'Die Stadt konnte nicht gesucht werden. Bitte erneut versuchen.', weatherSaved: '✓ Standort aktualisiert', weatherUse: 'Diesen Standort verwenden',
     slotNewChannel: 'Neuer Kanal',
     editChannel: 'Kanal bearbeiten',
     videosWord: 'Videos',
@@ -1925,6 +1927,25 @@ async function loadWeather() {
   } catch {}
 }
 
+// ── Toolbar links menu on/off (Settings → Links). The toolbar button is declared in manifest.json
+//    (browser_action → popup.html); background.js applies the same state at browser start. ──
+function applyMenuState() {
+  try {
+    const ba = typeof browser !== 'undefined' && browser.browserAction;
+    if (ba) { if (menuEnabled) ba.enable(); else ba.disable(); }
+  } catch (e) {}
+}
+function renderMenuSwitch() {
+  const sw = document.getElementById('menuSwitch'); if (!sw) return;
+  sw.classList.toggle('on', menuEnabled);
+  sw.setAttribute('aria-checked', menuEnabled ? 'true' : 'false');
+}
+async function toggleMenu() {
+  menuEnabled = !menuEnabled;
+  await Store.set('gd_menu', menuEnabled);
+  applyMenuState(); renderMenuSwitch();
+}
+
 // ── Weather location (Settings → Weather): city search through Open-Meteo's geocoding API ──
 function renderWeatherModal() {
   const cur = document.getElementById('weatherCurrent'); if (!cur) return;
@@ -2125,7 +2146,7 @@ function switchTab(tab) {
   document.querySelectorAll('.modal-panel').forEach(p => p.classList.toggle('active', p.id==='tab-'+tab || p.dataset.in===tab));
   updatePanelHead();
   document.querySelector('.modal-body').scrollTop = 0;
-  if (tab==='links') renderSectionModal();
+  if (tab==='links') { renderMenuSwitch(); renderSectionModal(); }
   if (tab==='feeds') renderFeedModal();
   if (tab==='markets') renderMarketModal();
   if (tab==='weather') renderWeatherModal();
@@ -3206,6 +3227,11 @@ function renderAllVideos(items, container) {
     const ag = document.createElement('div'); ag.className='video-age';
     ag.textContent = v.age + (v.channel ? ' · ' + v.channel : '');
     wrap.appendChild(ag);
+    // Hover hint: channel name (CSS reveals it on hover / keyboard focus)
+    if (v.channel) {
+      const hint = document.createElement('div'); hint.className = 'video-hint'; hint.textContent = v.channel;
+      wrap.appendChild(hint);
+    }
 
     // Title
     const title = document.createElement('div'); title.className='video-title'; title.textContent=v.title;
@@ -3304,6 +3330,7 @@ function exportConfig() {
     docker:   { url: dockerConfig.url,  apiKey: '', endpointId: dockerConfig.endpointId, name: dockerConfig.name },
     pihole:   { url: piholeConfig.url,  password: '' },
     weather:  weatherConfig,
+    menu:     menuEnabled,
     wall:     { ...wallSettings, src: null }, // skip image URL if any — user can re-add
   };
   // Include wall src only if it's a URL (not base64)
@@ -3350,6 +3377,7 @@ function importConfig(file) {
       if (config.lang)     { applyLang(config.lang); }
       if (config.theme)    { applyTheme(config.theme); }
       if (config.fontsize) { applyFontSize(config.fontsize); }
+      if (typeof config.menu === 'boolean') { menuEnabled = config.menu; await Store.set('gd_menu', menuEnabled); applyMenuState(); renderMenuSwitch(); }
       if (config.weather && config.weather.name) { weatherConfig = config.weather; await Store.set('gd_weather', weatherConfig); loadWeather(); }
       if (config.uptime)   { uptimeConfig = config.uptime; await Store.set('gd_uptime', uptimeConfig); loadUptime(true); }
       // Homelab configs: backups carry no secrets, so keep any existing local secret
@@ -4173,7 +4201,7 @@ function updateEditIconPreview(url) {
 // ════════════════════════════════════════════════
 // Fallback only for when the page is opened outside the extension context
 // (e.g. dashboard.html served as a plain file). The real source of truth is manifest.json.
-const APP_VERSION_FALLBACK = '1.12.1';
+const APP_VERSION_FALLBACK = '1.13.0';
 
 function getAppVersion() {
   try {
@@ -4185,6 +4213,12 @@ function getAppVersion() {
 
 // What's-new list shown in the About tab. Newest first; items translated per language.
 const CHANGELOG = [
+  { v: '1.13.0',
+    es: ['Menú de links en la barra de Firefox: un icono que abre tus links por secciones y grupos, con búsqueda y navegación con teclado (se activa en Configuración → Links)', 'Aviso con el nombre del canal al pasar el cursor sobre un vídeo de YouTube'],
+    en: ['Links menu in the Firefox toolbar: an icon that opens your links by section and group, with search and keyboard navigation (turn it on in Settings → Links)', 'Channel-name hint when hovering a YouTube video'],
+    ru: ['Меню ссылок на панели Firefox: значок, открывающий ваши ссылки по разделам и группам, с поиском и навигацией с клавиатуры (включается в Настройки → Ссылки)', 'Подсказка с названием канала при наведении на видео YouTube'],
+    fr: ['Menu des liens dans la barre Firefox : une icône qui ouvre vos liens par sections et groupes, avec recherche et navigation au clavier (à activer dans Paramètres → Liens)', 'Info-bulle avec le nom de la chaîne au survol d’une vidéo YouTube'],
+    de: ['Link-Menü in der Firefox-Symbolleiste: ein Symbol, das deine Links nach Abschnitten und Gruppen öffnet, mit Suche und Tastaturnavigation (einschaltbar unter Einstellungen → Links)', 'Hinweis mit dem Kanalnamen beim Überfahren eines YouTube-Videos'] },
   { v: '1.12.1',
     es: ['Ubicación del tiempo configurable: busca tu ciudad en Configuración o con el engranaje del widget', 'Iconos animados del tiempo: sol, luna, nubes, niebla, lluvia, nieve y tormenta con relámpagos'],
     en: ['Configurable weather location: search your city in Settings or with the widget\'s gear', 'Animated weather icons: sun, moon, clouds, fog, rain, snow and thunderstorms with lightning'],
@@ -4340,6 +4374,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnRemovePihole').addEventListener('click', removePiholeConfig);
   document.getElementById('btnManageMarkets').addEventListener('click', () => openModal('markets'));
   document.getElementById('btnManageWeather').addEventListener('click', () => openModal('weather'));
+  document.getElementById('menuSwitch').addEventListener('click', toggleMenu);
   document.getElementById('btnWeatherSearch').addEventListener('click', searchWeatherCity);
   document.getElementById('wcQuery').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); searchWeatherCity(); } });
   document.getElementById('btnRefreshMarkets').addEventListener('click', loadMarkets);
@@ -4409,6 +4444,8 @@ async function init() {
   dockerConfig  = await Store.get('gd_docker',  dockerConfig);
   piholeConfig  = await Store.get('gd_pihole',  piholeConfig);
   weatherConfig = await Store.get('gd_weather', weatherConfig);
+  menuEnabled = await Store.get('gd_menu', true);
+  applyMenuState();
   channels = await Store.get('gd_channels', DEFAULT_CHANNELS);
   widgets = normalizeWidgets(await Store.get('gd_widgets', null) || DEFAULT_WIDGETS.map(w => ({ ...w })));
   renderAbout();
@@ -4434,6 +4471,12 @@ async function init() {
 }
 // First run: a short welcome explaining the add-on. Anyone who already has saved settings
 // (e.g. an existing user after an update, or a synced browser) never sees it.
+// popup.js reads the saved links, so the example links shown on a fresh install must be stored as well.
+// On a first run this waits until the welcome dialog is dismissed (its check looks for saved settings).
+async function persistDefaultSections() {
+  if (document.getElementById('welcomeOverlay').classList.contains('open')) return;
+  if (await Store.get('gd_sections', null) === null) await Store.set('gd_sections', sections);
+}
 async function maybeShowWelcome() {
   if (await Store.get('gd_welcomed', false)) return;
   const hasConfig = await Store.get('gd_sections', null) !== null || await Store.get('gd_lang', null) !== null;
@@ -4443,6 +4486,9 @@ async function maybeShowWelcome() {
 async function closeWelcome(openSettings) {
   document.getElementById('welcomeOverlay').classList.remove('open');
   await Store.set('gd_welcomed', true);
+  await persistDefaultSections();
   if (openSettings) openModal('links');
 }
-init().then(maybeShowWelcome);
+init().then(maybeShowWelcome).then(persistDefaultSections)
+  .then(() => { if (location.hash === '#settings') openModal('links'); });   // opened from the toolbar menu
+window.addEventListener('hashchange', () => { if (location.hash === '#settings') openModal('links'); });
